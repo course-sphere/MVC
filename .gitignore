@@ -1,0 +1,63 @@
+# =========================
+# ASP.NET / .NET
+# =========================
+bin/
+obj/
+
+# =========================
+# Visual Studio
+# =========================
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# =========================
+# Rider / VS Code
+# =========================
+.idea/
+.vscode/
+
+# =========================
+# OS files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# User Secrets
+# =========================
+secrets.json
+
+# =========================
+# AppSettings (KHÔNG commit config thật)
+# =========================
+appsettings.json
+appsettings.*.json
+
+# Cho phép file mẫu
+!appsettings.example.json
+
+# =========================
+# Publish output
+# =========================
+publish/
+wwwroot/lib/
+
+# =========================
+# Test results
+# =========================
+TestResults/
+
+# =========================
+# Others
+# =========================
+*.cache
+*.tmp
