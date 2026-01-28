@@ -1,5 +1,5 @@
 <Solution>
   <Project Path="BusinessLayer/BusinessLayer.csproj" />
   <Project Path="DataAccessLayer/DataAccessLayer.csproj" />
-  <Project Path="PresentationLayer/PresentationLayer.csproj" />
+  <Project Path="PresentationLayer/PresentationLayer.csproj" Id="ccaeeaa1-c6a4-44eb-a38f-20a4084e2117" />
 </Solution>
