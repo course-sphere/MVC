@@ -14,7 +14,7 @@ namespace DataAccessLayer.Configurations
 
             // Relationship: SubmissionAnswerOption - QuestionSubmission
             builder.HasOne(x => x.QuestionSubmission)
-                   .WithMany(s => s.SelectedOptions)
+                   .WithMany(s => s.SubmissionAnswerOptions)
                    .HasForeignKey(x => x.QuestionSubmissionId)
                    .OnDelete(DeleteBehavior.Cascade);
 

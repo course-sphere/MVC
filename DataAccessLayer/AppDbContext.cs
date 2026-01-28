@@ -36,5 +36,6 @@ namespace DataAccessLayer
         public DbSet<AnswerOption> AnswerOptions { get; set; }
         public DbSet<UserLessonProgress> UserLessonProgresses { get; set; }
         public DbSet<LessonResource> LessonResources { get; set; }
+        public DbSet<Language> Languages { get; set; }
     }
 }

@@ -10,9 +10,9 @@ namespace DataAccessLayer.Configurations
         {
             builder.HasKey(lr => lr.LessonResourceId);
 
-            builder.HasOne(e => e.Lesson)
+            builder.HasOne(e => e.LessonItem)
                .WithMany(u => u.LessonResources)
-               .HasForeignKey(e => e.LessonId)
+               .HasForeignKey(e => e.LessonItemId)
                .OnDelete(DeleteBehavior.Cascade);   
         }
     }

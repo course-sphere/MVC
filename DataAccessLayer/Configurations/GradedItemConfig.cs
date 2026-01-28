@@ -9,9 +9,9 @@ namespace DataAccessLayer.Configurations
         public void Configure(EntityTypeBuilder<GradedItem> builder)
         {
             builder.HasKey(gi => gi.GradedItemId);
-            builder.HasOne(gi => gi.Lesson)
-                   .WithMany(l => l.GradedItems)
-                   .HasForeignKey(gi => gi.LessonId)
+            builder.HasOne(gi => gi.LessonItem)
+                   .WithOne(l => l.GradedItem)
+                   .HasForeignKey<GradedItem>(gi => gi.LessonItemId)
                    .OnDelete(DeleteBehavior.Cascade);
         }
     }   

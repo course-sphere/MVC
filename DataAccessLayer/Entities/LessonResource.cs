@@ -3,14 +3,15 @@
     public class LessonResource : Base
     {
         public Guid LessonResourceId { get; set; }
-        public Guid LessonId { get; set; }
+        public Guid LessonItemId { get; set; }
         public string Title { get; set; }
         public ResourceType ResourceType { get; set; }
-        public string ResourceUrl { get; set; }
+        public string? ResourceUrl { get; set; }
         public int OrderIndex { get; set; }
+        public string? TextContent { get; set; }
         public long? DurationInSeconds { get; set; }
         public bool IsDownloadable { get; set; }
-        public Lesson? Lesson { get; set; }
+        public LessonItem? LessonItem { get; set; }
     }
 
     public enum ResourceType
@@ -19,7 +20,7 @@
         Video,
         Pdf,
         Slide,
-        Document,
+        Text,
         Link,
         Image,
         Audio

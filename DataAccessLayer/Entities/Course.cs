@@ -3,6 +3,7 @@
     public class Course : Base
     {
         public Guid CourseId { get; set; }
+        public Guid LanguageId { get; set; }
         public string Title { get; set; }
         public string? Description { get; set; }
         public string? Image { get; set; }
@@ -11,6 +12,7 @@
         public string? RejectReason { get; set; }
         public CourseLevel Level { get; set; }
         public bool IsFree => Price == 0;
+        public Language Language { get; set; }
         public List<Module>? Modules { get; set; }
         public List<Enrollment>? Enrollments { get; set; }
         public List<Payment>? Payments { get; set; }
