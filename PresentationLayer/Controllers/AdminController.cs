@@ -31,25 +31,36 @@ namespace PresentationLayer.Controllers
             var activeCourses = await _dashboardService.GetActiveCoursesAsync();
             var totalEnrollments = await _dashboardService.GetTotalEnrollmentsAsync();
             var totalRevenue = await _dashboardService.GetTotalRevenueAsync();
-            var recentActivities = await _dashboardService.GetRecentActivitiesAsync();
+            var enrollmentsRes = await _dashboardService.GetLatestEnrollmentsAsync();
 
             if (totalUsers.IsSuccess) vm.TotalUsers = (int)totalUsers.Result;
             if (totalCourses.IsSuccess) vm.TotalCourses = (int)totalCourses.Result;
             if (activeCourses.IsSuccess) vm.ActiveCourses = (int)activeCourses.Result;
             if (totalEnrollments.IsSuccess) vm.TotalEnrollments = (int)totalEnrollments.Result;
-            if (totalRevenue.IsSuccess && totalRevenue.Result != null)
+
+            vm.TotalRevenue = totalRevenue.IsSuccess && totalRevenue.Result != null
+                ? Convert.ToDecimal(totalRevenue.Result)
+                : 0;
+
+            if (enrollmentsRes.IsSuccess)
             {
-                vm.TotalRevenue = Convert.ToDecimal(totalRevenue.Result);
+                var data = enrollmentsRes.Result as List<LatestEnrollmentResult>;
+                if (data != null)
+                {
+                    vm.LatestEnrollments = data.Select(e => new LatestEnrollmentVM
+                    {
+                        EnrolledAt = e.EnrolledAt,
+                        UserEmail = e.UserEmail,
+                        CourseName = e.CourseName,
+                        Progress = e.Progress,
+                        Status = e.Status
+                    }).ToList();
+                }
             }
-            else
-            {
-                vm.TotalRevenue = 0;
-            }
-            if (recentActivities.IsSuccess)
-                vm.RecentActivities = recentActivities.Result as List<RecentActivityViewModel>;
 
             return View(vm);
         }
+
 
         // ===== USER MANAGEMENT =====
         public async Task<IActionResult> Users(

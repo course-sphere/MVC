@@ -23,6 +23,7 @@ namespace BusinessLayer.IServices
 
         // ===== Tables / Charts =====
         Task<ApiResponse> GetRecentActivitiesAsync(int take = 5);
+        Task<ApiResponse> GetLatestEnrollmentsAsync(int take = 5);
 
         // ===== User Management =====
         Task<ApiResponse> GetAllUsersAsync();

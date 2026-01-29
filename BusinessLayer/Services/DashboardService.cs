@@ -92,6 +92,31 @@ namespace BusinessLayer.Services
 
             return new ApiResponse().SetOk(recent);
         }
+        public async Task<ApiResponse> GetLatestEnrollmentsAsync(int take = 5)
+        {
+            var enrollments = await _unitOfWork.Enrollments.GetAllAsync();
+            var users = await _unitOfWork.Users.GetAllAsync();
+            var courses = await _unitOfWork.Courses.GetAllAsync();
+
+            var data = (
+                from e in enrollments
+                join u in users on e.UserId equals u.UserId
+                join c in courses on e.CourseId equals c.CourseId
+                orderby e.EnrolledAt descending
+                select new LatestEnrollmentResult
+                {
+                    EnrolledAt = e.EnrolledAt,
+                    UserEmail = u.Email,
+                    CourseName = c.Title,
+                    Progress = e.ProgressPercent,
+                    Status = e.Status.ToString()
+                }
+            )
+            .Take(take)
+            .ToList();
+
+            return new ApiResponse().SetOk(data);
+        }
 
         // ===== USER MANAGEMENT METHODS =====
         public async Task<ApiResponse> GetAllUsersAsync()

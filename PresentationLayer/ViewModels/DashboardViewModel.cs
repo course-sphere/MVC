@@ -19,6 +19,8 @@ namespace PresentationLayer.ViewModels.Dashboard
         // ===== Table =====
         public List<RecentActivityViewModel> RecentActivities { get; set; }
             = new List<RecentActivityViewModel>();
+        public List<LatestEnrollmentVM> LatestEnrollments { get; set; }
+        = new List<LatestEnrollmentVM>();
     }
 
     public class RecentActivityViewModel
@@ -28,5 +30,15 @@ namespace PresentationLayer.ViewModels.Dashboard
         public string Activity { get; set; }
         public decimal? Amount { get; set; }
         public string Status { get; set; }
+    }
+    public class LatestEnrollmentVM
+    {
+        public DateTime? EnrolledAt { get; set; }
+        public string UserEmail { get; set; }
+        public string CourseName { get; set; }
+        public decimal Progress { get; set; }
+        public string Status { get; set; }
+
+
     }
 }
