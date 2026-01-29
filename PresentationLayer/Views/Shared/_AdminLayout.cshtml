@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+</head>
+<body class="bg-zinc-50 font-sans text-zinc-900" x-data="{ sidebarOpen: true }">
+
+    <div class="flex h-screen overflow-hidden">
+
+        <partial name="_AdminSidebar" />
+
+        <div class="relative flex flex-col flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300"
+             :class="sidebarOpen ? 'lg:ml-64' : 'lg:ml-0'">
+
+            <partial name="_AdminHeader" />
+
+            <main class="w-full flex-grow p-6">
+                @RenderBody()
+            </main>
+        </div>
+
+        <div x-show="sidebarOpen" @@click="sidebarOpen = false"
+             class="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm lg:hidden"
+             x-transition.opacity
+             x-cloak></div>
+    </div>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

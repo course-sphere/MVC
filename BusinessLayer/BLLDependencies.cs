@@ -14,7 +14,7 @@ namespace BusinessLayer
 
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
-            services.AddScoped<IPaymentService, PaymentService>();
+            //services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<ICourseService, CourseService>();
             services.AddScoped<IEnrollmentService, EnrollmentService>();
             services.AddScoped<IClaimService, ClaimService>();
