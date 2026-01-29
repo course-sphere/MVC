@@ -44,5 +44,29 @@ namespace PresentationLayer.Controllers
 
             return View(vm);
         }
+        public IActionResult CourseStatistics()
+        {
+            return View();
+        }
+        public IActionResult PendingCourses()
+        {
+            return View();
+        }
+
+        public IActionResult Users()
+        {
+            return View();
+        }
+
+        public IActionResult Payments()
+        {
+            return View();
+        }
+
+        public IActionResult Reports()
+        {
+            return View();
+        }
+
     }
 }
