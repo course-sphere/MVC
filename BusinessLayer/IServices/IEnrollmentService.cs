@@ -12,5 +12,6 @@ namespace BusinessLayer.IServices
     {
         Task<ApiResponse> EnrollStudentDirectlyAsync(Guid courseId);
         Task<ApiResponse> GetStudentEnrollmentsAsync();
+        Task<bool> CheckEnrollmentAsync(Guid courseId);
     }
 }

@@ -1,0 +1,54 @@
+@model BusinessLayer.Responses.Course.CourseResponse
+@{ ViewData["Title"] = Model.Title; Layout = "_Layout"; }
+
+<partial name="_Notification" />
+
+<div class="max-w-4xl mx-auto py-8 px-4">
+    <a asp-action="Browse" class="text-zinc-500 hover:text-zinc-900 mb-4 inline-block"><i class="fas fa-arrow-left mr-2"></i>Back</a>
+
+    <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        @if (!string.IsNullOrEmpty(Model.Image))
+        { <img src="@Model.Image" class="w-full h-64 object-cover"> }
+        else
+        { <div class="w-full h-64 bg-zinc-200 flex items-center justify-center"><i class="fas fa-image text-zinc-400 text-5xl"></i></div> }
+
+        <div class="p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-zinc-900 mb-2">@Model.Title</h1>
+                    <div class="flex items-center gap-3">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700">@Model.Level</span>
+                        @if (Model.Price == 0)
+                        { <span class="text-emerald-600 font-semibold">Free</span> }
+                        else
+                        { <span class="text-zinc-900 font-semibold">$@Model.Price.ToString("N0")</span> }
+                    </div>
+                </div>
+                @{
+                    var isEnrolled = ViewBag.IsEnrolled ?? false;
+                    var isAuthenticated = User.Identity?.IsAuthenticated ?? false;
+                }
+                @if (isEnrolled)
+                {
+                    <a asp-action="Learn" asp-route-id="@Model.CourseId" class="px-6 py-2.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 font-medium inline-flex items-center gap-2">
+                        <i class="fas fa-play"></i>
+                        Continue Learning
+                    </a>
+                }
+                else if (isAuthenticated)
+                {
+                    <form asp-action="Enroll" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="courseId" value="@Model.CourseId" />
+                        <button type="submit" class="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium">Enroll Now</button>
+                    </form>
+                }
+                else
+                {
+                    <a asp-controller="Auth" asp-action="Login" class="px-6 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-medium">Login to Enroll</a>
+                }
+            </div>
+            <p class="text-zinc-600">@Model.Description</p>
+        </div>
+    </div>
+</div>

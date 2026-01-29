@@ -80,11 +80,13 @@ namespace BusinessLayer.Services
             ApiResponse response = new ApiResponse();
             try
             {
-                var lesson = await _unitOfWork.Lessons.GetAsync(l => l.LessonId == lessonId);
+                var lesson = await _unitOfWork.Lessons.GetAsync(l => l.LessonId == lessonId && !l.IsDeleted);
                 if (lesson == null)
                     return response.SetNotFound("Lesson not found");
 
-                await _unitOfWork.Lessons.RemoveIdAsync(lesson.LessonId);
+                // Soft delete instead of hard delete to avoid FK constraint with UserLessonProgress
+                lesson.IsDeleted = true;
+                lesson.UpdatedBy = _service.GetUserClaim().UserId;
                 await _unitOfWork.SaveChangeAsync();
 
                 return response.SetOk("Lesson deleted successfully");

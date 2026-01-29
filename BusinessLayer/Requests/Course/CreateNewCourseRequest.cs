@@ -10,5 +10,6 @@ namespace BusinessLayer.Requests.Course
         public IFormFile? ImageFile { get; set; }
         public decimal Price { get; set; }
         public CourseLevel Level { get; set; }
+        public Guid LanguageId { get; set; } = Guid.Parse("11111111-1111-1111-1111-111111111111"); // Default: English
     }
 }

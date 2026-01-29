@@ -61,3 +61,4 @@ TestResults/
 # =========================
 *.cache
 *.tmp
+.claude

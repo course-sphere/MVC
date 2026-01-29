@@ -1,14 +1,23 @@
-using System.Diagnostics;
+using BusinessLayer.IServices;
+using BusinessLayer.Responses.Course;
 using Microsoft.AspNetCore.Mvc;
-using PresentationLayer.Models;
 
 namespace PresentationLayer.Controllers
 {
     public class HomeController : Controller
     {
-        public IActionResult Index()
+        private readonly ICourseService _courseService;
+
+        public HomeController(ICourseService courseService)
         {
-            return View();
+            _courseService = courseService;
+        }
+
+        public async Task<IActionResult> Index()
+        {
+            var result = await _courseService.GetAllCourseAsync();
+            var courses = result.IsSuccess ? result.Result as List<CourseResponse> : new List<CourseResponse>();
+            return View(courses);
         }
     }
 }

@@ -1,5 +1,280 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+@model BusinessLayer.Responses.Course.CourseResponse
 @{
+    ViewData["Title"] = "Course Builder";
+    Layout = "_AdminLayout";
+    var modules = ViewBag.Modules as List<BusinessLayer.Responses.Module.ModuleResponse> ?? new List<BusinessLayer.Responses.Module.ModuleResponse>();
+}
+
+<partial name="_Notification" />
+
+<div class="space-y-6" x-data="{
+    showModuleModal: false,
+    showLessonModal: false,
+    showEditLessonModal: false,
+    selectedModuleId: null,
+    moduleName: '',
+    moduleDescription: '',
+    lessonTitle: '',
+    lessonContent: '',
+    editLesson: { id: '', title: '', description: '', estimatedMinutes: 0 }
+}">
+    <!-- Header -->
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+            <a asp-action="Dashboard" class="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <div>
+                <h1 class="text-2xl font-bold text-zinc-900">@Model.Title</h1>
+                <p class="text-zinc-500 mt-1">Add modules and lessons to your course</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-2">
+            <button @@click="showModuleModal = true" class="inline-flex items-center gap-2 px-4 py-2.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors font-medium text-sm">
+                <i class="fas fa-plus"></i>
+                Add Module
+            </button>
+            <form asp-action="SubmitForReview" method="post" class="inline">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="id" value="@Model.CourseId" />
+                <button type="submit" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium text-sm">
+                    <i class="fas fa-paper-plane"></i>
+                    Submit for Review
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Course Info Card -->
+    <div class="bg-white rounded-xl border border-zinc-200 p-6">
+        <div class="flex items-start gap-4">
+            @if (!string.IsNullOrEmpty(Model.Image))
+            {
+                <img src="@Model.Image" alt="@Model.Title" class="w-24 h-24 rounded-lg object-cover">
+            }
+            else
+            {
+                <div class="w-24 h-24 bg-zinc-200 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-image text-zinc-400 text-2xl"></i>
+                </div>
+            }
+            <div class="flex-1">
+                <p class="text-zinc-600 line-clamp-2">@Model.Description</p>
+                <div class="flex items-center gap-4 mt-3">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-zinc-100 text-zinc-700">
+                        @Model.Level
+                    </span>
+                    @if (Model.Price == 0)
+                    {
+                        <span class="text-emerald-600 font-medium text-sm">Free</span>
+                    }
+                    else
+                    {
+                        <span class="text-zinc-900 font-medium text-sm">$@Model.Price.ToString("N0")</span>
+                    }
+                    <span class="text-zinc-500 text-sm">@modules.Count modules</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modules List -->
+    <div class="space-y-4">
+        @if (modules.Count == 0)
+        {
+            <div class="bg-white rounded-xl border border-zinc-200 p-12 text-center">
+                <div class="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-folder-open text-zinc-400 text-2xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-zinc-900 mb-2">No modules yet</h3>
+                <p class="text-zinc-500 mb-4">Start building your course by adding the first module</p>
+                <button @@click="showModuleModal = true" class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors text-sm font-medium">
+                    <i class="fas fa-plus"></i>
+                    Add Module
+                </button>
+            </div>
+        }
+        else
+        {
+            @foreach (var module in modules.OrderBy(m => m.Index))
+            {
+                <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden" x-data="{ open: true }">
+                    <!-- Module Header -->
+                    <div class="px-6 py-4 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between cursor-pointer" @@click="open = !open">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-zinc-200 rounded-lg flex items-center justify-center text-zinc-600 font-medium text-sm">
+                                @module.Index
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-zinc-900">@module.Name</h3>
+                                <p class="text-sm text-zinc-500">@module.Lessons.Count lessons</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button @@click.stop="selectedModuleId = '@module.ModuleId'; showLessonModal = true" class="p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors" title="Add Lesson">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <form asp-action="DeleteModule" method="post" class="inline" x-on:click.stop>
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@module.ModuleId" />
+                                <input type="hidden" name="courseId" value="@Model.CourseId" />
+                                <button type="submit" class="p-2 text-zinc-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Module" onclick="return confirm('Delete this module and all its lessons?')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                            <i class="fas fa-chevron-down text-zinc-400 transition-transform" :class="{ 'rotate-180': !open }"></i>
+                        </div>
+                    </div>
+
+                    <!-- Lessons List -->
+                    <div x-show="open" x-collapse>
+                        @if (module.Lessons.Count == 0)
+                        {
+                            <div class="p-6 text-center text-zinc-500">
+                                <p>No lessons in this module yet</p>
+                                <button @@click="selectedModuleId = '@module.ModuleId'; showLessonModal = true" class="mt-2 text-sm text-zinc-900 hover:underline">
+                                    + Add first lesson
+                                </button>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="divide-y divide-zinc-100">
+                                @foreach (var lesson in module.Lessons.OrderBy(l => l.OrderIndex))
+                                {
+                                    <div class="px-6 py-4 flex items-center justify-between hover:bg-zinc-50 transition-colors">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 bg-zinc-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-play-circle text-zinc-500"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-zinc-900">@lesson.Title</p>
+                                                <p class="text-sm text-zinc-500">@lesson.EstimatedMinutes min</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <button type="button" 
+                                                @@click.stop="editLesson = { id: '@lesson.LessonId', title: '@lesson.Title.Replace("'", "\\'")' , description: '@(lesson.Content?.Replace("'", "\\'")?? "")', estimatedMinutes: @lesson.EstimatedMinutes }; showEditLessonModal = true" 
+                                                class="p-2 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
+                                                title="Edit Lesson">
+                                                <i class="fas fa-edit text-sm"></i>
+                                            </button>
+                                            <form asp-action="DeleteLesson" method="post" class="inline" x-on:click.stop>
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@lesson.LessonId" />
+                                                <input type="hidden" name="courseId" value="@Model.CourseId" />
+                                                <button type="submit" class="p-2 text-zinc-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Lesson" onclick="return confirm('Delete this lesson?')">
+                                                    <i class="fas fa-trash text-sm"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+
+    <!-- Add Module Modal -->
+    <div x-show="showModuleModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @@keydown.escape.window="showModuleModal = false">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black/50" @@click="showModuleModal = false"></div>
+            <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6" @@click.stop>
+                <h3 class="text-lg font-semibold text-zinc-900 mb-4">Add New Module</h3>
+                <form asp-action="AddModule" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="CourseId" value="@Model.CourseId" />
+                    <input type="hidden" name="Index" value="@(modules.Count + 1)" />
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Module Name *</label>
+                            <input type="text" name="Name" required class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent" placeholder="e.g., Introduction">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Description</label>
+                            <textarea name="Description" rows="3" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none" placeholder="Brief description of this module..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @@click="showModuleModal = false" class="px-4 py-2 text-zinc-600 hover:text-zinc-900 font-medium">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 font-medium">Add Module</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Lesson Modal -->
+    <div x-show="showLessonModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @@keydown.escape.window="showLessonModal = false">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black/50" @@click="showLessonModal = false"></div>
+            <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6" @@click.stop>
+                <h3 class="text-lg font-semibold text-zinc-900 mb-4">Add New Lesson</h3>
+                <form asp-action="AddLesson" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.CourseId" />
+                    <input type="hidden" name="ModuleId" x-bind:value="selectedModuleId" />
+                    <input type="hidden" name="OrderIndex" value="1" />
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Lesson Title *</label>
+                            <input type="text" name="Title" required class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent" placeholder="e.g., Getting Started">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Content</label>
+                            <textarea name="Content" rows="4" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none" placeholder="Lesson content or description..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Estimated Minutes</label>
+                            <input type="number" name="EstimatedMinutes" min="0" value="10" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent" placeholder="e.g., 15">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @@click="showLessonModal = false" class="px-4 py-2 text-zinc-600 hover:text-zinc-900 font-medium">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 font-medium">Add Lesson</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Lesson Modal -->
+    <div x-show="showEditLessonModal" x-cloak class="fixed inset-0 z-50 overflow-y-auto" @@keydown.escape.window="showEditLessonModal = false">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="fixed inset-0 bg-black/50" @@click="showEditLessonModal = false"></div>
+            <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full p-6" @@click.stop>
+                <h3 class="text-lg font-semibold text-zinc-900 mb-4">Edit Lesson</h3>
+                <form asp-action="EditLesson" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.CourseId" />
+                    <input type="hidden" name="lessonId" x-bind:value="editLesson.id" />
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Lesson Title *</label>
+                            <input type="text" name="Title" required x-model="editLesson.title" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent" placeholder="e.g., Getting Started">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Description</label>
+                            <textarea name="Description" rows="3" x-model="editLesson.description" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent resize-none" placeholder="Lesson description..."></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-zinc-700 mb-2">Estimated Minutes</label>
+                            <input type="number" name="EstimatedMinutes" min="0" x-model="editLesson.estimatedMinutes" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:ring-2 focus:ring-zinc-900 focus:border-transparent" placeholder="e.g., 15">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="button" @@click="showEditLessonModal = false" class="px-4 py-2 text-zinc-600 hover:text-zinc-900 font-medium">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 font-medium">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://unpkg.com/@@alpinejs/collapse@3.x.x/dist/cdn.min.js"></script>
 }

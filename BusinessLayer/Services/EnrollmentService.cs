@@ -141,6 +141,21 @@ namespace BusinessLayer.Services
             }
         }
 
+        public async Task<bool> CheckEnrollmentAsync(Guid courseId)
+        {
+            try
+            {
+                var userId = _service.GetUserClaim().UserId;
+                var enrollment = await _unitOfWork.Enrollments.GetAsync(
+                    e => e.CourseId == courseId && e.UserId == userId && e.Status == EnrollmentStatus.Active
+                );
+                return enrollment != null;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
     }
 }

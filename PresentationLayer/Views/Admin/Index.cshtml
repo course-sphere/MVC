@@ -1,0 +1,72 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "_AdminLayout";
+}
+
+<partial name="_Notification" />
+
+<div class="space-y-6">
+    <div>
+        <h1 class="text-2xl font-bold text-zinc-900">Admin Dashboard</h1>
+        <p class="text-zinc-500 mt-1">Welcome to the admin portal</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-xl border border-zinc-200 p-5">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-blue-100 rounded-lg">
+                    <i class="fas fa-users text-blue-600 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-zinc-900">4</p>
+                    <p class="text-sm text-zinc-500">Total Users</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-zinc-200 p-5">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-emerald-100 rounded-lg">
+                    <i class="fas fa-book text-emerald-600 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-zinc-900">0</p>
+                    <p class="text-sm text-zinc-500">Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-zinc-200 p-5">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-amber-100 rounded-lg">
+                    <i class="fas fa-clock text-amber-600 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-zinc-900">0</p>
+                    <p class="text-sm text-zinc-500">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white rounded-xl border border-zinc-200 p-5">
+            <div class="flex items-center gap-4">
+                <div class="p-3 bg-purple-100 rounded-lg">
+                    <i class="fas fa-dollar-sign text-purple-600 text-lg"></i>
+                </div>
+                <div>
+                    <p class="text-2xl font-bold text-zinc-900">$0</p>
+                    <p class="text-sm text-zinc-500">Revenue</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-xl border border-zinc-200 p-6">
+        <h2 class="font-semibold text-zinc-900 mb-4">Quick Actions</h2>
+        <div class="flex gap-3">
+            <a href="/Admin/PendingCourses" class="px-4 py-2 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 text-sm font-medium">
+                Review Courses
+            </a>
+            <a href="/Admin/Users" class="px-4 py-2 border border-zinc-300 text-zinc-700 rounded-lg hover:bg-zinc-50 text-sm font-medium">
+                Manage Users
+            </a>
+        </div>
+    </div>
+</div>
