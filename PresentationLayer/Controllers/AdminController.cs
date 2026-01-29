@@ -2,6 +2,12 @@
 using Microsoft.AspNetCore.Mvc;
 using BusinessLayer.IServices;
 using PresentationLayer.ViewModels.Dashboard;
+using PresentationLayer.ViewModels.UserManagement;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using DataAccessLayer.Entities;
+using BusinessLayer.Responses;
 
 namespace PresentationLayer.Controllers
 {
@@ -15,7 +21,7 @@ namespace PresentationLayer.Controllers
             _dashboardService = dashboardService;
         }
 
-        // GET: /Admin
+        // ===== DASHBOARD =====
         public async Task<IActionResult> Dashboard()
         {
             var vm = new DashboardViewModel();
@@ -44,16 +50,119 @@ namespace PresentationLayer.Controllers
 
             return View(vm);
         }
+
+        // ===== USER MANAGEMENT =====
+        public async Task<IActionResult> Users(
+    int pageNumber = 1,
+    int pageSize = 10,
+    string searchTerm = null,
+    Role? roleFilter = null)
+        {
+            var response = await _dashboardService
+                .GetUsersPaginatedAsync(pageNumber, pageSize, searchTerm, roleFilter);
+
+            var vm = new UserManagementViewModel
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                SearchTerm = searchTerm,
+                RoleFilter = roleFilter
+            };
+
+            if (!response.IsSuccess || response.Result == null)
+            {
+                TempData["ErrorMessage"] = response.ErrorMessage ?? "Failed to load users";
+                return View(vm);
+            }
+
+            var result = response.Result as PagedUsersResult;
+
+            if (result == null)
+            {
+                TempData["ErrorMessage"] = "Invalid users data format";
+                return View(vm);
+            }
+
+            var users = result.Users;
+
+            if (users != null)
+            {
+                vm.Users = users.Select(u => new UserViewModel
+                {
+                    UserId = u.UserId,
+                    FullName = u.FullName ?? "",
+                    Email = u.Email ?? "",
+                    PhoneNumber = u.PhoneNumber ?? "",
+                    Role = u.Role,
+                    IsVerfied = u.IsVerfied,
+                    Image = u.Image,
+                    CreatedAt = u.CreatedAt
+                }).ToList();
+            }
+
+            vm.TotalCount = result.TotalCount;
+            vm.TotalPages = result.TotalPages;
+
+            return View(vm);
+        }
+
+        // GET: /Admin/EditUser/{id}
+        public async Task<IActionResult> EditUser(Guid id)
+        {
+            var response = await _dashboardService.GetUserByIdAsync(id);
+
+            if (!response.IsSuccess || response.Result == null)
+            {
+                TempData["ErrorMessage"] = "User not found";
+                return RedirectToAction(nameof(Users));
+            }
+
+            return View(response.Result);
+        }
+
+        // POST: /Admin/UpdateUser
+        [HttpPost]
+        public async Task<IActionResult> UpdateUser(Guid userId, string fullName, string email, string phoneNumber, Role role)
+        {
+            var response = await _dashboardService.UpdateUserAsync(userId, fullName, email, phoneNumber, role);
+
+            if (response.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "User updated successfully";
+                return RedirectToAction(nameof(Users));
+            }
+            else
+            {
+                TempData["ErrorMessage"] = response.ErrorMessage ?? "Update user failed";
+                return RedirectToAction(nameof(EditUser), new { id = userId });
+            }
+        }
+
+        // POST: /Admin/DeleteUser
+        [HttpPost]
+        public async Task<IActionResult> DeleteUser(Guid userId)
+        {
+            var response = await _dashboardService.DeleteUserAsync(userId);
+
+            if (response.IsSuccess)
+            {
+                TempData["SuccessMessage"] = "User deleted successfully";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = response.ErrorMessage ?? "Delete user failed";
+            }
+
+            return RedirectToAction(nameof(Users));
+        }
+
+        // ===== OTHER PAGES =====
         public IActionResult CourseStatistics()
         {
             return View();
         }
-        public IActionResult PendingCourses()
-        {
-            return View();
-        }
 
-        public IActionResult Users()
+        public IActionResult PendingCourses()
         {
             return View();
         }
@@ -67,6 +176,5 @@ namespace PresentationLayer.Controllers
         {
             return View();
         }
-
     }
 }

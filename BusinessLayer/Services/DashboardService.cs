@@ -2,6 +2,9 @@
 using BusinessLayer.Responses;
 using DataAccessLayer;
 using DataAccessLayer.Entities;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BusinessLayer.Services
 {
@@ -14,6 +17,7 @@ namespace BusinessLayer.Services
             _unitOfWork = unitOfWork;
         }
 
+        // ===== DASHBOARD METHODS =====
         public async Task<ApiResponse> GetTotalUsersAsync()
         {
             var users = await _unitOfWork.Users.GetAllAsync();
@@ -87,6 +91,117 @@ namespace BusinessLayer.Services
                 });
 
             return new ApiResponse().SetOk(recent);
+        }
+
+        // ===== USER MANAGEMENT METHODS =====
+        public async Task<ApiResponse> GetAllUsersAsync()
+        {
+            var users = await _unitOfWork.Users.GetAllAsync(u => u.IsDeleted == false);
+
+            var userList = users.Select(u => new
+            {
+                u.UserId,
+                u.FullName,
+                u.Email,
+                u.PhoneNumber,
+                u.Role,
+                u.IsVerfied,
+                u.Image,
+                u.CreatedAt
+            }).ToList();
+
+            return new ApiResponse().SetOk(userList);
+        }
+
+        public async Task<ApiResponse> GetUserByIdAsync(Guid userId)
+        {
+            var users = await _unitOfWork.Users.GetAllAsync(u => u.UserId == userId);
+            var user = users.FirstOrDefault();
+
+            if (user == null)
+            {
+                return new ApiResponse().SetNotFound("User not found");
+            }
+
+            return new ApiResponse().SetOk(user);
+        }
+
+        public async Task<ApiResponse> GetUsersPaginatedAsync(
+    int pageNumber,
+    int pageSize,
+    string searchTerm = null,
+    Role? roleFilter = null)
+        {
+            var users = await _unitOfWork.Users.GetAllAsync(u => u.IsDeleted == false);
+            var query = users.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                searchTerm = searchTerm.ToLower();
+                query = query.Where(u =>
+                    u.FullName.ToLower().Contains(searchTerm) ||
+                    u.Email.ToLower().Contains(searchTerm));
+            }
+
+            if (roleFilter.HasValue)
+            {
+                query = query.Where(u => u.Role == roleFilter.Value);
+            }
+
+            var totalCount = query.Count();
+
+            var pagedUsers = query
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList(); // 👈 trả ENTITY
+
+            return new ApiResponse().SetOk(new PagedUsersResult
+            {
+                Users = pagedUsers,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            });
+        }
+
+        public async Task<ApiResponse> UpdateUserAsync(Guid userId, string fullName, string email, string phoneNumber, Role role)
+        {
+            var users = await _unitOfWork.Users.GetAllAsync(u => u.UserId == userId);
+            var user = users.FirstOrDefault();
+
+            if (user == null)
+            {
+                return new ApiResponse().SetNotFound("User not found");
+            }
+
+            user.FullName = fullName;
+            user.Email = email;
+            user.PhoneNumber = phoneNumber;
+            user.Role = role;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Users.Update(user);
+
+            return new ApiResponse().SetOk("User updated successfully");
+        }
+
+        public async Task<ApiResponse> DeleteUserAsync(Guid userId)
+        {
+            var users = await _unitOfWork.Users.GetAllAsync(u => u.UserId == userId);
+            var user = users.FirstOrDefault();
+
+            if (user == null)
+            {
+                return new ApiResponse().SetNotFound("User not found");
+            }
+
+            // Soft delete
+            user.IsDeleted = true;
+            user.UpdatedAt = DateTime.UtcNow;
+
+            _unitOfWork.Users.Update(user);
+
+            return new ApiResponse().SetOk("User deleted successfully");
         }
     }
 }

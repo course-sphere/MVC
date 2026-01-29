@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BusinessLayer.Responses;
-
+using DataAccessLayer.Entities;
 
 namespace BusinessLayer.IServices
 {
@@ -23,5 +23,12 @@ namespace BusinessLayer.IServices
 
         // ===== Tables / Charts =====
         Task<ApiResponse> GetRecentActivitiesAsync(int take = 5);
+
+        // ===== User Management =====
+        Task<ApiResponse> GetAllUsersAsync();
+        Task<ApiResponse> GetUserByIdAsync(Guid userId);
+        Task<ApiResponse> GetUsersPaginatedAsync(int pageNumber, int pageSize, string searchTerm = null, Role? roleFilter = null);
+        Task<ApiResponse> UpdateUserAsync(Guid userId, string fullName, string email, string phoneNumber, Role role);
+        Task<ApiResponse> DeleteUserAsync(Guid userId);
     }
 }
