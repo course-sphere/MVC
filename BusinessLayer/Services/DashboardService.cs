@@ -181,7 +181,7 @@ namespace BusinessLayer.Services
             user.UpdatedAt = DateTime.UtcNow;
 
             _unitOfWork.Users.Update(user);
-
+            await _unitOfWork.SaveChangeAsync();
             return new ApiResponse().SetOk("User updated successfully");
         }
 
@@ -200,6 +200,7 @@ namespace BusinessLayer.Services
             user.UpdatedAt = DateTime.UtcNow;
 
             _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveChangeAsync();
 
             return new ApiResponse().SetOk("User deleted successfully");
         }

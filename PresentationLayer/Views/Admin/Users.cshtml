@@ -63,12 +63,14 @@
                             <!-- Role -->
                             <td class="px-6 py-4">
                                 <span class="inline-flex px-3 py-1 rounded-full text-xs font-semibold
-                                        @(user.Role.ToString() == "Instructor"
-                                                                          ? "bg-amber-100 text-amber-700"
-                                                                          : "bg-emerald-100 text-emerald-700")">
-                                                                                                            @user.Role
-                                                                                                        </span>
-                                                                                                    </td>
+                @(user.Role.ToString() == "Admin"
+                                                  ? "bg-emerald-100 text-emerald-700"
+                                                  : user.Role.ToString() == "Student"
+                                                      ? "bg-red-100 text-red-700"
+                                                      : "bg-amber-100 text-amber-700")">
+                                                                                    @user.Role
+                                                                                </span>
+                                                                            </td>
 
                             <!-- Status -->
                             <td class="px-6 py-4">
@@ -88,12 +90,18 @@
                             <!-- Actions -->
                             <td class="px-6 py-4">
                                 <div class="flex gap-2">
-                                    <a asp-action="EditUser"
-                                       asp-route-id="@user.UserId"
-                                       class="inline-flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-600 hover:text-white">
+                                    <button type="button"
+                                            onclick="openEditModal(
+                                            '@user.UserId',
+                                            '@user.FullName',
+                                            '@user.Email',
+                                            '@user.PhoneNumber',
+                                            '@user.Role'
+                                        )"
+                                            class="inline-flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-600 hover:text-white">
                                         <i class="fas fa-edit"></i>
                                         Edit
-                                    </a>
+                                    </button>
 
                                     <form asp-action="DeleteUser"
                                           method="post"
@@ -147,3 +155,74 @@
         </div>
     </div>
 </div>
+<!-- EDIT USER MODAL -->
+<div id="editModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white w-full max-w-lg rounded-xl p-6">
+        <h3 class="text-lg font-semibold mb-4">Edit User</h3>
+
+        <form asp-action="UpdateUser" method="post">
+            <input type="hidden" id="userId" name="userId" />
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Full Name</label>
+                <input type="text" id="fullName" name="fullName"
+                       class="w-full border rounded-lg px-3 py-2" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Email</label>
+                <input type="email" id="email" name="email"
+                       class="w-full border rounded-lg px-3 py-2" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="block text-sm font-medium">Phone</label>
+                <input type="text" id="phoneNumber" name="phoneNumber"
+                       class="w-full border rounded-lg px-3 py-2" />
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-medium">Role</label>
+                <select id="role" name="role"
+                        class="w-full border rounded-lg px-3 py-2">
+                    <option value="Student">Student</option>
+                    <option value="Instructor">Instructor</option>
+                    <option value="Admin">Admin</option>
+                </select>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button type="button"
+                        onclick="closeEditModal()"
+                        class="px-4 py-2 bg-gray-200 rounded-lg">
+                    Cancel
+                </button>
+
+                <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(id, name, email, phone, role) {
+        document.getElementById('userId').value = id;
+        document.getElementById('fullName').value = name;
+        document.getElementById('email').value = email;
+        document.getElementById('phoneNumber').value = phone;
+        document.getElementById('role').value = role;
+
+        const modal = document.getElementById('editModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeEditModal() {
+        const modal = document.getElementById('editModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+</script>
