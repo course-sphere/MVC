@@ -71,7 +71,7 @@ namespace PresentationLayer.Controllers
             // Ưu tiên 1: Nếu là Admin -> Vào trang Admin
             if (role == "Admin")
             {
-                return RedirectToAction("Index", "Admin");
+                return RedirectToAction("Dashboard", "Admin");
             }
             // Ưu tiên 2: Nếu là Instructor -> Vào trang Giảng viên
             else if (role == "Instructor")

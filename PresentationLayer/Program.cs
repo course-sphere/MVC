@@ -53,6 +53,7 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 var app = builder.Build();
 
             // Configure the HTTP request pipeline.
