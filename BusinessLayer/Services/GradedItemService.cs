@@ -21,56 +21,6 @@ namespace BusinessLayer.Services
             _service = service;
         }
 
-        public async Task<ApiResponse> CreateNewGradedItemAsync(CreateGradedItemRequest request)
-        {
-            ApiResponse response = new ApiResponse();
-            try
-            {
-                var lesson = await _unitOfWork.Lessons
-                    .GetAsync(x => x.LessonId == request.LessonId);
-
-                if (lesson == null)
-                    return response.SetNotFound("Lesson not found");
-
-                var gradedItem = _mapper.Map<GradedItem>(request);
-
-                gradedItem.GradedItemId = Guid.NewGuid();
-                gradedItem.IsAutoGraded = request.Type == GradedItemType.Quiz;
-                gradedItem.Lesson = lesson;
-
-                if (request.Questions != null && request.Questions.Any())
-                {
-                    gradedItem.Questions = request.Questions.Select(q =>
-                    {
-                        var question = _mapper.Map<Question>(q);
-                        question.QuestionId = Guid.NewGuid();
-                        question.GradedItemId = gradedItem.GradedItemId;
-
-                        if (q.AnswerOptions != null)
-                        {
-                            question.AnswerOptions = q.AnswerOptions.Select(a =>
-                                new AnswerOption
-                                {
-                                    AnswerOptionId = Guid.NewGuid(),
-                                    Text = a.Text,
-                                    IsCorrect = a.IsCorrect
-                                }).ToList();
-                        }
-
-                        return question;
-                    }).ToList();
-                }
-
-                await _unitOfWork.GradedItems.AddAsync(gradedItem);
-                await _unitOfWork.SaveChangeAsync();
-
-                return response.SetOk("Graded item created successfully");
-            }
-            catch (Exception ex)
-            {
-                return response.SetBadRequest(message: ex.Message);
-            }
-        }
         public async Task<ApiResponse> SubmitQuizAsync(SubmitQuizRequest request)
         {
             ApiResponse response = new ApiResponse();
@@ -84,7 +34,7 @@ namespace BusinessLayer.Services
                 if (gradedItem == null)
                     return response.SetNotFound("Quiz not found");
 
-                if (!gradedItem.IsAutoGraded || gradedItem.Type != GradedItemType.Quiz)
+                if (!gradedItem.IsAutoGraded || gradedItem.GradedItemType != GradedItemType.Quiz)
                     return response.SetBadRequest("This quiz is not auto-graded");
 
                 var attempt = new GradedAttempt
@@ -93,7 +43,8 @@ namespace BusinessLayer.Services
                     GradedItemId = gradedItem.GradedItemId,
                     UserId = userId,
                     SubmittedAt = DateTime.UtcNow,
-                    QuestionSubmissions = new()
+                    QuestionSubmissions = new(),
+                    Status = GradedAttemptStatus.Submitted
                 };
 
                 decimal totalScore = 0;
@@ -121,7 +72,6 @@ namespace BusinessLayer.Services
                     {
                         QuestionSubmissionId = Guid.NewGuid(),
                         QuestionId = question.QuestionId,
-                        IsCorrect = isCorrect,
                         Score = questionScore,
                         SubmissionAnswerOptions = answer.SelectedAnswerOptionIds
                             .Select(id => new SubmissionAnswerOption
@@ -132,7 +82,7 @@ namespace BusinessLayer.Services
                 }
 
                 attempt.Score = totalScore;
-
+                attempt.Status = GradedAttemptStatus.Submitted;
                 await _unitOfWork.GradedAttempts.AddAsync(attempt);
                 await _unitOfWork.SaveChangeAsync();
 
@@ -140,7 +90,7 @@ namespace BusinessLayer.Services
                 {
                     attempt.Score,
                     MaxScore = gradedItem.MaxScore,
-                    attempt.IsSubmitted
+                    attempt.Status
                 });
             }
             catch (Exception ex)

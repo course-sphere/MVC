@@ -1,169 +1,229 @@
-﻿using BusinessLayer;
-using BusinessLayer.IServices;
-using DataAccessLayer.Entities;
-using BusinessLayer.Requests.Payment;
-using BusinessLayer.Responses;
-using BusinessLayer.Libraries;
-using Microsoft.AspNetCore.Http;
-using DataAccessLayer;
-using Microsoft.Extensions.Configuration;
+﻿//using BusinessLayer;
+//using BusinessLayer.IServices;
+//using BusinessLayer.Libraries;
+//using BusinessLayer.Requests.Payment;
+//using BusinessLayer.Responses;
+//using BusinessLayer.Responses.Course;
+//using DataAccessLayer;
+//using DataAccessLayer.Entities;
+//using Microsoft.AspNetCore.Http;
+//using Microsoft.Extensions.Configuration;
+//using PayOS;
 
-namespace BusinessLayer.Services
-{
-    public class PaymentService : IPaymentService
-    {
-        private readonly IConfiguration _config;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IClaimService _service;
+//namespace BusinessLayer.Services
+//{
+//    public class PaymentService : IPaymentService
+//    {
+//        private readonly IConfiguration _config;
+//        private readonly IUnitOfWork _unitOfWork;
+//        private readonly IClaimService _service;
 
-        public PaymentService(IConfiguration config, IUnitOfWork unitOfWork, IClaimService service)
-        {
-            _config = config;
-            _unitOfWork = unitOfWork;
-            _service = service;
-        }
+//        public PaymentService(IConfiguration config, IUnitOfWork unitOfWork, IClaimService service)
+//        {
+//            _config = config;
+//            _unitOfWork = unitOfWork;
+//            _service = service;
+//        }
 
-        public async Task<ApiResponse> CreatePaymentUrlAsync(CreateNewPaymentRequest request, HttpContext context)
-        {
-            ApiResponse response = new ApiResponse();
-            try
-            {
-                var claim = _service.GetUserClaim();
-                var course = await _unitOfWork.Courses.GetAsync(c => c.CourseId == request.CourseId);
-                if (course == null)
-                {
-                    return response.SetNotFound(message: "Course not found");
-                }
+//        /*public async Task<ApiResponse> CreatePaymentUrlAsync(CreateNewPaymentRequest request, HttpContext context)
+//        {
+//            ApiResponse response = new ApiResponse();
+//            try
+//            {
+//                var claim = _service.GetUserClaim();
+//                var course = await _unitOfWork.Courses.GetAsync(c => c.CourseId == request.CourseId);
+//                if (course == null)
+//                {
+//                    return response.SetNotFound(message: "Course not found");
+//                }
 
-                var enrollment = await _unitOfWork.Enrollments.GetAsync(e => e.UserId == claim.UserId && e.CourseId == course.CourseId);
+//                var enrollment = await _unitOfWork.Enrollments.GetAsync(e => e.UserId == claim.UserId && e.CourseId == course.CourseId);
 
-                if (enrollment == null)
-                {
-                    enrollment = new Enrollment
-                    {
-                        EnrollmentId = Guid.NewGuid(),
-                        UserId = claim.UserId,
-                        CourseId = course.CourseId,
-                        Status = EnrollmentStatus.PendingPayment
-                    };
+//                if (enrollment == null)
+//                {
+//                    enrollment = new Enrollment
+//                    {
+//                        EnrollmentId = Guid.NewGuid(),
+//                        UserId = claim.UserId,
+//                        CourseId = course.CourseId,
+//                        Status = EnrollmentStatus.PendingPayment
+//                    };
 
-                    await _unitOfWork.Enrollments.AddAsync(enrollment);
-                }
-                else
-                {
-                    enrollment.Status = EnrollmentStatus.PendingPayment;
-                    enrollment.UpdatedAt = DateTime.UtcNow;
-                }
-                await _unitOfWork.SaveChangeAsync();
+//                    await _unitOfWork.Enrollments.AddAsync(enrollment);
+//                }
+//                else
+//                {
+//                    enrollment.Status = EnrollmentStatus.PendingPayment;
+//                    enrollment.UpdatedAt = DateTime.UtcNow;
+//                }
+//                await _unitOfWork.SaveChangeAsync();
 
-                var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_config["TimeZoneId"]);
-                var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
-                var tick = DateTime.Now.Ticks.ToString();
-                var pay = new VnPayLibrary();
+//                var timeZoneById = TimeZoneInfo.FindSystemTimeZoneById(_config["TimeZoneId"]);
+//                var timeNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZoneById);
+//                var tick = DateTime.Now.Ticks.ToString();
+//                var pay = new VnPayLibrary();
 
-                var txnRef = $"{claim.UserId}|{course.CourseId}|{DateTime.UtcNow.Ticks}";
+//                var txnRef = $"{claim.UserId}|{course.CourseId}|{DateTime.UtcNow.Ticks}";
 
-                var urlCallBack = $"{_config["PaymentCallBack:ReturnUrl"]}?userId={claim.UserId}&amount={course.Price}";
+//                var urlCallBack = $"{_config["PaymentCallBack:ReturnUrl"]}?userId={claim.UserId}&amount={course.Price}";
 
-                pay.AddRequestData("vnp_Version", _config["Vnpay:Version"]);
-                pay.AddRequestData("vnp_Command", _config["Vnpay:Command"]);
-                pay.AddRequestData("vnp_TmnCode", _config["Vnpay:TmnCode"]);
-                pay.AddRequestData("vnp_Amount", ((int)course.Price * 100 *26000).ToString());
-                pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
-                pay.AddRequestData("vnp_CurrCode", _config["Vnpay:CurrCode"]);
-                pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
-                pay.AddRequestData("vnp_Locale", _config["Vnpay:Locale"]);
-                pay.AddRequestData("vnp_OrderInfo", $"{course.Price}");
-                pay.AddRequestData("vnp_OrderType", "VnPay");
-                pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
-                pay.AddRequestData("vnp_TxnRef", txnRef);
+//                pay.AddRequestData("vnp_Version", _config["Vnpay:Version"]);
+//                pay.AddRequestData("vnp_Command", _config["Vnpay:Command"]);
+//                pay.AddRequestData("vnp_TmnCode", _config["Vnpay:TmnCode"]);
+//                pay.AddRequestData("vnp_Amount", ((int)course.Price * 100 *26000).ToString());
+//                pay.AddRequestData("vnp_CreateDate", timeNow.ToString("yyyyMMddHHmmss"));
+//                pay.AddRequestData("vnp_CurrCode", _config["Vnpay:CurrCode"]);
+//                pay.AddRequestData("vnp_IpAddr", pay.GetIpAddress(context));
+//                pay.AddRequestData("vnp_Locale", _config["Vnpay:Locale"]);
+//                pay.AddRequestData("vnp_OrderInfo", $"{course.Price}");
+//                pay.AddRequestData("vnp_OrderType", "VnPay");
+//                pay.AddRequestData("vnp_ReturnUrl", urlCallBack);
+//                pay.AddRequestData("vnp_TxnRef", txnRef);
 
-                var paymentUrl = pay.CreateRequestUrl(_config["Vnpay:BaseUrl"], _config["Vnpay:HashSecret"]);
+//                var paymentUrl = pay.CreateRequestUrl(_config["Vnpay:BaseUrl"], _config["Vnpay:HashSecret"]);
 
-                return response.SetOk(paymentUrl);
-            }
-            catch (Exception ex)
-            {
-                return response.SetBadRequest(message: ex.Message);
-            }
-        }
+//                return response.SetOk(paymentUrl);
+//            }
+//            catch (Exception ex)
+//            {
+//                return response.SetBadRequest(message: ex.Message);
+//            }
+//        }
 
-        public async Task<ApiResponse> PaymentExecuteAsync(IQueryCollection collection)
-        {
-            ApiResponse response = new ApiResponse();
-            try
-            {
-                var pay = new VnPayLibrary();
-                var vnPayResponse = pay.GetFullResponseData(collection, _config["Vnpay:HashSecret"]);
+//        public async Task<ApiResponse> PaymentExecuteAsync(IQueryCollection collection)
+//        {
+//            ApiResponse response = new ApiResponse();
+//            try
+//            {
+//                var pay = new VnPayLibrary();
+//                var vnPayResponse = pay.GetFullResponseData(collection, _config["Vnpay:HashSecret"]);
 
-                if (!collection.TryGetValue("vnp_TxnRef", out var txnRefValue))
-                    return response.SetBadRequest("Missing vnp_TxnRef");
+//                if (!collection.TryGetValue("vnp_TxnRef", out var txnRefValue))
+//                    return response.SetBadRequest("Missing vnp_TxnRef");
 
-                var parts = txnRefValue.ToString().Split('|');
-                if (parts.Length < 2)
-                    return response.SetBadRequest("Invalid TxnRef format");
+//                var parts = txnRefValue.ToString().Split('|');
+//                if (parts.Length < 2)
+//                    return response.SetBadRequest("Invalid TxnRef format");
 
-                if (!Guid.TryParse(parts[0], out Guid userId))
-                    return response.SetBadRequest("Invalid userId");
+//                if (!Guid.TryParse(parts[0], out Guid userId))
+//                    return response.SetBadRequest("Invalid userId");
 
-                if (!Guid.TryParse(parts[1], out Guid courseId))
-                    return response.SetBadRequest("Invalid courseId");
+//                if (!Guid.TryParse(parts[1], out Guid courseId))
+//                    return response.SetBadRequest("Invalid courseId");
 
-                var enrollment = await _unitOfWork.Enrollments.GetAsync(e =>
-                    e.UserId == userId &&
-                    e.CourseId == courseId
-                );
+//                var enrollment = await _unitOfWork.Enrollments.GetAsync(e =>
+//                    e.UserId == userId &&
+//                    e.CourseId == courseId
+//                );
 
-                if (enrollment == null)
-                    return response.SetNotFound("Enrollment not found");
+//                if (enrollment == null)
+//                    return response.SetNotFound("Enrollment not found");
 
-                if (enrollment.Status != EnrollmentStatus.PendingPayment)
-                {
-                    return response.SetOk("Payment already processed");
-                }
+//                if (enrollment.Status != EnrollmentStatus.PendingPayment)
+//                {
+//                    return response.SetOk("Payment already processed");
+//                }
                    
-                if (vnPayResponse.VnPayResponseCode != "00")
-                {
-                    enrollment.Status = EnrollmentStatus.Cancelled;
+//                if (vnPayResponse.VnPayResponseCode != "00")
+//                {
+//                    enrollment.Status = EnrollmentStatus.Cancelled;
 
-                    await _unitOfWork.Payments.AddAsync(new Payment
-                    {
-                        PaymentId = Guid.NewGuid(),
-                        UserId = userId,
-                        CourseId = courseId,
-                        Amount = enrollment.Course!.Price,
-                        Method = "VnPay",
-                    });
+//                    await _unitOfWork.Payments.AddAsync(new Payment
+//                    {
+//                        PaymentId = Guid.NewGuid(),
+//                        UserId = userId,
+//                        CourseId = courseId,
+//                        Amount = enrollment.Course!.Price,
+//                        Method = "VnPay",
+//                    });
 
-                    await _unitOfWork.SaveChangeAsync();
-                    return response.SetBadRequest("Payment failed");
-                }
+//                    await _unitOfWork.SaveChangeAsync();
+//                    return response.SetBadRequest("Payment failed");
+//                }
 
-                var course = await _unitOfWork.Courses.GetAsync(c => c.CourseId == enrollment.CourseId);
-                if (course == null) return response.SetNotFound("Course not found");
-                // 2️⃣ Tạo Payment
-                var payment = new Payment
-                {
-                    PaymentId = Guid.NewGuid(),
-                    UserId = userId,
-                    CourseId = courseId,
-                    Amount = course.Price,
-                    Method = "VnPay",
-                    IsSuccess = true,
-                    EnrollmentId = enrollment.EnrollmentId
-                };
+//                var course = await _unitOfWork.Courses.GetAsync(c => c.CourseId == enrollment.CourseId);
+//                if (course == null) return response.SetNotFound("Course not found");
+//                // 2️⃣ Tạo Payment
+//                var payment = new Payment
+//                {
+//                    PaymentId = Guid.NewGuid(),
+//                    UserId = userId,
+//                    CourseId = courseId,
+//                    Amount = course.Price,
+//                    Method = "VnPay",
+//                    IsSuccess = true,
+//                    EnrollmentId = enrollment.EnrollmentId
+//                };
 
-                enrollment.Status = EnrollmentStatus.Active;
+//                enrollment.Status = EnrollmentStatus.Active;
 
-                await _unitOfWork.Payments.AddAsync(payment);
-                await _unitOfWork.SaveChangeAsync();
+//                await _unitOfWork.Payments.AddAsync(payment);
+//                await _unitOfWork.SaveChangeAsync();
 
-                return response.SetOk("Payment created successfully ^^");
-            }
-            catch (Exception ex)
-            {
-                return response.SetBadRequest(message: ex.Message);
-            }
-        }
-    }
-}
+//                return response.SetOk("Payment created successfully ^^");
+//            }
+//            catch (Exception ex)
+//            {
+//                return response.SetBadRequest(message: ex.Message);
+//            }
+//        }*/
+
+//        public async Task<ApiResponse> CreatePaymentAsync(Guid courseId)
+//        {
+//            ApiResponse response = new ApiResponse();
+//            try
+//            {
+//                var course = await _unitOfWork.Courses.GetAsync(c => c.CourseId == courseId);
+//                if (course == null)
+//                    return new ApiResponse().SetNotFound("Course not found");
+
+//                long orderCode = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+//                var payment = new Payment
+//                {
+//                    PaymentId = Guid.NewGuid(),
+//                    UserId = userId,
+//                    CourseId = courseId,
+//                    OrderCode = orderCode,
+//                    Amount = course.Price,
+//                    Status = "PENDING"
+//                };
+
+//                await _unitOfWork.Payments.AddAsync(payment);
+//                await _unitOfWork.SaveChangesAsync();
+
+//                var payOS = new PayOS(
+//                    _config.ClientId,
+//                    _config.ApiKey,
+//                    _config.ChecksumKey
+//                );
+
+//                var paymentData = new PaymentData(
+//                    orderCode: orderCode,
+//                    amount: (int)course.Price,
+//                    description: $"Thanh toan khoa hoc {course.Title}",
+//                    items: new List<ItemData>
+//                    {
+//            new ItemData(course.Title, 1, (int)course.Price)
+//                    },
+//                    returnUrl: _config.ReturnUrl,
+//                    cancelUrl: _config.CancelUrl
+//                );
+
+//                var result = await payOS.createPaymentLink(paymentData);
+
+//                payment.CheckoutUrl = result.checkoutUrl;
+//                await _unitOfWork.SaveChangeAsync();
+
+//                return new ApiResponse().SetOk(new
+//                {
+//                    checkoutUrl = result.checkoutUrl
+//                });
+//            }
+//            catch (Exception ex)
+//            {
+//                return response.SetBadRequest(message: ex.Message);
+//            }
+//        }
+//    }
+//}

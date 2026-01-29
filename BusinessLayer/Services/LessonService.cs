@@ -38,28 +38,9 @@ namespace BusinessLayer.Services
                 lesson.CreatedBy = claim.UserId;
                 lesson.OrderIndex = newOrderIndex;
 
-                lesson.GradedItems = new List<GradedItem>();
+                lesson.LessonItems = new List<LessonItem>();
 
                 await _unitOfWork.Lessons.AddAsync(lesson);
-
-                if (lesson.Type == LessonType.GradedAssignment || lesson.Type == LessonType.PracticeAssignment)
-                {
-                    var gradedItem = new GradedItem
-                    {
-                        GradedItemId = Guid.NewGuid(), // Tạo ID luôn để dùng ngay
-                        LessonId = lesson.LessonId,
-                        Type = GradedItemType.Quiz,
-                        MaxScore = 100,
-                        IsAutoGraded = true,
-                        CreatedBy = claim.UserId,
-                        CreatedAt = DateTime.UtcNow
-                    };
-
-                    await _unitOfWork.GradedItems.AddAsync(gradedItem);
-
-                    // ===> QUAN TRỌNG: Gán ngược lại vào lesson để Mapper thấy data ngay lập tức <===
-                    lesson.GradedItems.Add(gradedItem);
-                }
 
                 await _unitOfWork.SaveChangeAsync();
 
@@ -124,14 +105,14 @@ namespace BusinessLayer.Services
                 );
 
                 lessons = lessons.OrderBy(l => l.OrderIndex).ToList();
-
+                var lessonItems = await _unitOfWork.LessonItems.GetAllAsync(li => lessons.Select(l => l.LessonId).Contains(li.LessonId));
                 var result = new
                 {
                     Total = lessons.Count(),
-                    VideoCount = lessons.Count(l => l.Type == LessonType.Video),
-                    ReadingCount = lessons.Count(l => l.Type == LessonType.Reading),
-                    PracticeCount = lessons.Count(l => l.Type == LessonType.PracticeAssignment),
-                    GradedCount = lessons.Count(l => l.Type == LessonType.GradedAssignment),
+                    VideoCount = lessonItems.Count(l => l.Type == LessonItemType.Video),
+                    ReadingCount = lessonItems.Count(l => l.Type == LessonItemType.Reading),
+                    PracticeCount = lessonItems.Count(l => l.Type == LessonItemType.Quiz),
+                    GradedCount = lessonItems.Count(l => l.Type == LessonItemType.Assignment),
                     Lessons = _mapper.Map<List<LessonResponse>>(lessons)
                 };
 

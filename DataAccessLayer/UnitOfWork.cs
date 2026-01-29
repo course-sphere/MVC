@@ -9,22 +9,25 @@ namespace DataAccessLayer
         private readonly AppDbContext _context;
 
         // 1. Khai báo Property (Mỗi cái chỉ khai báo 1 lần)
-        public IUserRepository Users { get; }
+        public IAnswerOptionRepository AnswerOptions { get; }
         public ICourseRepository Courses { get; }
         public IEnrollmentRepository Enrollments { get; }
-        public ILessonRepository Lessons { get; }
-        public IPaymentRepository Payments { get; }
-        public IModuleRepository Modules { get; }
-        public IGradedItemRepository GradedItems { get; }
         public IGradedAttemptRepository GradedAttempts { get; }
+        public IGradedItemRepository GradedItems { get; }
+        public ILanguageRepository Languages { get; }
+        public ILessonRepository Lessons { get; }
+        public ILessonItemRepository LessonItems { get; }
+        public ILessonResourceRepository LessonResources { get; }
+        public IModuleRepository Modules { get; }
+        public IPaymentRepository Payments { get; }
+        public IQuestionRepository Questions { get; }
         public IQuestionSubmissionRepository QuestionSubmissions { get; }
         public ISubmissionAnswerOptionRepository SubmissionAnswerOptions { get; }
-        public ILessonResourceRepository LessonResources { get; }
-        public IUserLessonProgressRepository LessonProgresses { get; }
-
-        public IGenericRepository<Question> Questions { get; private set; }
-        public IGenericRepository<AnswerOption> AnswerOptions { get; private set; }
-        public IGenericRepository<UserLessonProgress> UserLessonProgress { get; private set; }
+        public IUserRepository Users { get; }
+        public IUserLessonProgressRepository UserLessonProgresses { get; }
+        public IWalletRepository Wallets { get; }
+        public IWalletTransactionRepository WalletTransactions { get; }
+        //18
         public UnitOfWork(AppDbContext context)
         {
             _context = context;
@@ -40,12 +43,14 @@ namespace DataAccessLayer
             SubmissionAnswerOptions = new SubmissionAnswerOptionRepository(context);
             Modules = new ModuleRepository(context);
             LessonResources = new LessonResourceRepository(context);
-            LessonProgresses = new UserLessonProgressRepository(context);
-
-            Questions = new GenericRepository<Question>(context);
-            AnswerOptions = new GenericRepository<AnswerOption>(context);
-            UserLessonProgress = new GenericRepository<UserLessonProgress>(context);
-
+            UserLessonProgresses = new UserLessonProgressRepository(context);
+            Questions = new QuestionRepository(context);
+            AnswerOptions = new AnswerOptionRepository(context);
+            Languages = new LanguageRepository(context);
+            LessonItems = new LessonItemRepository(context);
+            Wallets = new WalletRepository(context);
+            WalletTransactions = new WalletTransactionRepository(context);
+            //18
         }
 
         public async Task SaveChangeAsync()

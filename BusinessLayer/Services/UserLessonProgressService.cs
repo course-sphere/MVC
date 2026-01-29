@@ -33,7 +33,7 @@ namespace BusinessLayer.Services
                 if (lesson == null)
                     return response.SetNotFound("Lesson not found");
 
-                var progress = await _unitOfWork.LessonProgresses.GetAsync(
+                var progress = await _unitOfWork.UserLessonProgresses.GetAsync(
                     p => p.UserId == userId && p.LessonId == request.LessonId);
 
                 // Chưa có → tạo mới
@@ -50,7 +50,7 @@ namespace BusinessLayer.Services
                         IsCompleted = false
                     };
 
-                    await _unitOfWork.LessonProgresses.AddAsync(progress);
+                    await _unitOfWork.UserLessonProgresses.AddAsync(progress);
                 }
                 else
                 {
@@ -58,7 +58,7 @@ namespace BusinessLayer.Services
                     progress.CompletionPercent = request.CompletionPercent ?? progress.CompletionPercent;
                     progress.LastAccessedAt = DateTime.UtcNow;
 
-                    _unitOfWork.LessonProgresses.Update(progress);
+                    _unitOfWork.UserLessonProgresses.Update(progress);
                 }
 
                 await _unitOfWork.SaveChangeAsync();
@@ -77,7 +77,7 @@ namespace BusinessLayer.Services
             {
                 var userId = _claimService.GetUserClaim().UserId;
 
-                var progress = await _unitOfWork.LessonProgresses.GetAsync(
+                var progress = await _unitOfWork.UserLessonProgresses.GetAsync(
                     p => p.UserId == userId && p.LessonId == lessonId);
 
                 if (progress == null)
@@ -87,13 +87,13 @@ namespace BusinessLayer.Services
                 progress.CompletedAt = DateTime.UtcNow;
                 progress.CompletionPercent = 100;
 
-                _unitOfWork.LessonProgresses.Update(progress);
+                _unitOfWork.UserLessonProgresses.Update(progress);
                 var courseId = progress.Lesson.Module.CourseId;
 
                 var totalLessonInCourse = await _unitOfWork.Lessons
                     .CountAsync(l => l.Module.CourseId == courseId);
 
-                var completedLessonsInCourse = await _unitOfWork.LessonProgresses.CountAsync(
+                var completedLessonsInCourse = await _unitOfWork.UserLessonProgresses.CountAsync(
                     lp => lp.UserId == userId
                        && lp.IsCompleted
                        && lp.Lesson.Module.CourseId == courseId
@@ -134,7 +134,7 @@ namespace BusinessLayer.Services
             {
                 var userId = _claimService.GetUserClaim().UserId;
 
-                var progress = await _unitOfWork.LessonProgresses.GetAsync(
+                var progress = await _unitOfWork.UserLessonProgresses.GetAsync(
                     p => p.UserId == userId && p.LessonId == lessonId);
 
                 return response.SetOk(progress);
@@ -150,7 +150,7 @@ namespace BusinessLayer.Services
             ApiResponse response = new ApiResponse();
             try
             {
-                var progresses = await _unitOfWork.LessonProgresses
+                var progresses = await _unitOfWork.UserLessonProgresses
                     .GetAllAsync(p => p.UserId == userId);
 
                 return response.SetOk(progresses);

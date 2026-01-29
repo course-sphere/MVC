@@ -75,18 +75,17 @@ namespace BusinessLayer.Services
                 GradedAttemptId = attemptId,
                 QuestionId = questionId,
                 AnswerText = answer,
-                FileUrl = file != null ? await _storage.UploadQuestionSubmissionFile(file) : null,
             };
 
             await _unitOfWork.QuestionSubmissions.AddAsync(submission);
             await _unitOfWork.SaveChangeAsync();
-            var instructor = await _unitOfWork.Users.GetAsync(x => x.UserId == attempt.GradedItem.Lesson.Module.Course.CreatedBy);
+            var instructor = await _unitOfWork.Users.GetAsync(x => x.UserId == attempt.GradedItem.LessonItem.Lesson.Module.Course.CreatedBy);
             if (instructor != null) {
                 await _emailService.SendShortAnswerNotifyToInstructor(
         instructorName: instructor.FullName,
         instructorEmail: instructor.Email,
         studentName: student.FullName,
-        courseTitle: attempt.GradedItem.Lesson.Module.Course.Title
+        courseTitle: attempt.GradedItem.LessonItem.Lesson.Module.Course.Title
     ); }
 
             return response.SetOk("Answer submitted");
@@ -100,8 +99,9 @@ namespace BusinessLayer.Services
                 x => x.GradedAttemptId == attemptId,
                 include: q => q
                     .Include(a => a.GradedItem)
-                        .ThenInclude(g => g.Lesson)
-                            .ThenInclude(l => l.Module)
+                        .ThenInclude(g => g.LessonItem)
+                            .ThenInclude(l => l.Lesson)
+                                .ThenInclude(m => m.Module)
                     .Include(a => a.QuestionSubmissions)
                         .ThenInclude(q => q.Question)
                             .ThenInclude(q => q.AnswerOptions));
@@ -135,7 +135,7 @@ namespace BusinessLayer.Services
                         .Select(a => a.AnswerOptionId)
                         .ToHashSet();
                     //Dap an student chon
-                    var selectedAnswerIds = submission.SelectedOptions!
+                    var selectedAnswerIds = submission.SubmissionAnswerOptions!
                         .Select(s => s.AnswerOptionId)
                         .ToHashSet();
                     bool isCorrect = selectedAnswerIds.SetEquals(correctAnswerIds);
@@ -154,7 +154,7 @@ namespace BusinessLayer.Services
                 if (!hasManualQuestion)
                 {
                     attempt.Score = totalScore;
-                    attempt.Status = GradedAttemptStatus.Graded;
+                    attempt.Status = GradedAttemptStatus.AutoGraded;
                     attempt.GradedAt = DateTime.UtcNow;
 
                     await UpdateLessonAndEnrollmentProgress(attempt);
@@ -178,14 +178,15 @@ namespace BusinessLayer.Services
                 x => x.GradedAttemptId == attemptId,
                 include: q => q
                     .Include(a => a.GradedItem)
-                        .ThenInclude(g => g.Lesson)
-                            .ThenInclude(l => l.Module));
+                        .ThenInclude(g => g.LessonItem)
+                            .ThenInclude(k => k.Lesson)
+                                .ThenInclude(l => l.Module));
 
             if (attempt == null)
                 return response.SetNotFound("Attempt not found");
 
             attempt.Score = score;
-            attempt.Status = GradedAttemptStatus.Graded;
+            attempt.Status = GradedAttemptStatus.ManuallyGraded;
             attempt.GradedAt = DateTime.UtcNow;
 
             await UpdateLessonAndEnrollmentProgress(attempt);
@@ -199,11 +200,11 @@ namespace BusinessLayer.Services
         private async Task UpdateLessonAndEnrollmentProgress(GradedAttempt attempt)
         {
             var userId = attempt.UserId;
-            var lessonId = attempt.GradedItem!.Lesson.LessonId;
-            var courseId = attempt.GradedItem.Lesson.Module!.CourseId;
+            var lessonId = attempt.GradedItem!.LessonItem.Lesson.LessonId;
+            var courseId = attempt.GradedItem.LessonItem.Lesson.Module!.CourseId;
 
             // LessonProgress
-            var lessonProgress = await _unitOfWork.LessonProgresses.GetAsync(
+            var lessonProgress = await _unitOfWork.UserLessonProgresses.GetAsync(
                 x => x.UserId == userId && x.LessonId == lessonId);
 
             if (lessonProgress != null)
@@ -212,14 +213,14 @@ namespace BusinessLayer.Services
                 lessonProgress.CompletionPercent = 100;
                 lessonProgress.CompletedAt = DateTime.UtcNow;
 
-                _unitOfWork.LessonProgresses.Update(lessonProgress);
+                _unitOfWork.UserLessonProgresses.Update(lessonProgress);
             }
 
             // Enrollment Progress
             var totalLessons = await _unitOfWork.Lessons.CountAsync(
                 x => x.Module!.CourseId == courseId);
 
-            var completedLessons = await _unitOfWork.LessonProgresses.CountAsync(
+            var completedLessons = await _unitOfWork.UserLessonProgresses.CountAsync(
                 x => x.UserId == userId && x.IsCompleted);
 
             var enrollment = await _unitOfWork.Enrollments.GetAsync(

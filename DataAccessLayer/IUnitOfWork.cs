@@ -12,15 +12,18 @@ namespace DataAccessLayer
         IPaymentRepository Payments { get; }
         IModuleRepository Modules { get; }
         ILessonResourceRepository LessonResources { get; }
-        IUserLessonProgressRepository LessonProgresses { get; }
+        ILessonItemRepository LessonItems { get; }
         IGradedItemRepository GradedItems { get; }
         IGradedAttemptRepository GradedAttempts { get; }
         ISubmissionAnswerOptionRepository SubmissionAnswerOptions { get; }
         IQuestionSubmissionRepository QuestionSubmissions { get; }
-
-        IGenericRepository<AnswerOption> AnswerOptions { get; }
-        IGenericRepository<Question> Questions { get; }
-        IGenericRepository<UserLessonProgress> UserLessonProgress { get; }
+        IAnswerOptionRepository AnswerOptions { get; }
+        IQuestionRepository Questions { get; }
+        IUserLessonProgressRepository UserLessonProgresses { get; }
+        ILanguageRepository Languages { get; }
+        IWalletRepository Wallets { get; }
+        IWalletTransactionRepository WalletTransactions { get; }
+        //18
 
         Task SaveChangeAsync();
     }

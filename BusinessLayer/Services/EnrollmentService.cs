@@ -13,14 +13,13 @@ namespace BusinessLayer.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly IPaymentService _paymentService;
+        //private readonly IPaymentService _paymentService;
         private readonly IClaimService _service;
 
-        public EnrollmentService(IUnitOfWork unitOfWork, IMapper mapper, IPaymentService paymentService, IClaimService service)
+        public EnrollmentService(IUnitOfWork unitOfWork, IMapper mapper, IClaimService service)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _paymentService = paymentService;
             _service = service;
         }
 
@@ -137,7 +136,7 @@ namespace BusinessLayer.Services
                         LastWatchedSecond = 0
                     };
                     // Dùng Generic Repository đã khai báo trong UnitOfWork
-                    await _unitOfWork.UserLessonProgress.AddAsync(progress);
+                    await _unitOfWork.UserLessonProgresses.AddAsync(progress);
                 }
             }
         }

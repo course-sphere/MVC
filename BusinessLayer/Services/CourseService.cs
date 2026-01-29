@@ -148,13 +148,14 @@ namespace BusinessLayer.Services
 
                     var lessons = await _unitOfWork.Lessons.GetAllAsync(l => moduleIds.Contains(l.ModuleId));
                     var lessonIds = lessons.Select(l => l.LessonId).ToList();
-
+                    var lessonItems = await _unitOfWork.LessonItems.GetAllAsync(l => lessonIds.Contains(l.LessonId));
+                    var lessonItemIds = lessonItems.Select(li => li.LessonItemId).ToList();
                     var courseMapping = _mapper.Map<GetAllCourseForAdminResponse>(course);
 
                     courseMapping.ModuleCount = modules.Count;
                     courseMapping.LessonCount = lessons.Count;
-                    courseMapping.VideoCount = lessons.Count(l => l.Type == LessonType.Video);
-                    courseMapping.ReadingCount = lessons.Count(l => l.Type == LessonType.Reading);
+                    courseMapping.VideoCount = lessonItems.Count(li => li.Type == LessonItemType.Video);
+                    courseMapping.ReadingCount = lessonItems.Count(l => l.Type == LessonItemType.Reading);
 
                     result.Add(courseMapping);
                 }
@@ -324,7 +325,7 @@ namespace BusinessLayer.Services
             }
         }
 
-        public async Task<ApiResponse> GetCourseLearningDetailAsync(Guid courseId)
+     /*   public async Task<ApiResponse> GetCourseLearningDetailAsync(Guid courseId)
         {
             try
             {
@@ -368,11 +369,6 @@ namespace BusinessLayer.Services
 
                     foreach (var lesson in lessons)
                     {
-                        // Map Lesson Type sang chuỗi UI cần
-                        string type = "reading";
-                        if (lesson.Type == DataAccessLayer.Entities.LessonType.Video) type = "video";
-                        if (lesson.Type == DataAccessLayer.Entities.LessonType.GradedAssignment || lesson.Type == DataAccessLayer.Entities.LessonType.PracticeAssignment) type = "quiz";
-
                         var lessonRes = new LessonLearningResponse
                         {
                             Id = lesson.LessonId,
@@ -396,7 +392,7 @@ namespace BusinessLayer.Services
                         if (type == "quiz")
                         {
                             // Load Quiz Data (Vì Generic Repo ko hỗ trợ Include sâu, ta load thủ công)
-                            var gradedItems = await _unitOfWork.GradedItems.GetAllAsync(g => g.LessonId == lesson.LessonId);
+                            var gradedItems = await _unitOfWork.GradedItems.GetAllAsync(g => g.LessonItemId == lesson.LessonId);
                             var quiz = gradedItems.FirstOrDefault();
 
                             if (quiz != null)
@@ -438,57 +434,33 @@ namespace BusinessLayer.Services
                 return new ApiResponse().SetBadRequest(ex.Message);
             }
         }
-
+*/
         // Trong CourseService.cs
 
         public async Task<ApiResponse> GetCourseDetailForStudentAsync(Guid courseId)
         {
             try
             {
+                var userId = _service.GetUserClaim().UserId;
                 // 1. Lấy thông tin Course
                 var course = await _unitOfWork.Courses.GetAsync(c => c.CourseId == courseId);
                 if (course == null) return new ApiResponse().SetNotFound("Course not found");
 
                 var instructor = await _unitOfWork.Users.GetAsync(u => u.UserId == course.CreatedBy);
+                var language = await _unitOfWork.Languages.GetAsync(l => l.LanguageId == course.LanguageId);
 
                 // 2. Lấy Modules & Lessons (Query thủ công để gom hết vào 1 cục)
-                var modules = await _unitOfWork.Modules.GetAllAsync(m => m.CourseId == courseId);
-                var responseModules = new List<StudentModuleResponse>();
+                var modules = await _unitOfWork.Modules.GetAllAsync(m => m.CourseId == courseId && !m.IsDeleted);
+                var moduleIds = modules.Select(m => m.ModuleId).ToList();
+                var lessons = await _unitOfWork.Lessons.GetAllAsync(l => moduleIds.Contains(l.ModuleId) && !l.IsDeleted);
+                var lessonIds = lessons.Select(l => l.LessonId).ToList();
+                var lessonItems = await _unitOfWork.LessonItems.GetAllAsync(li => lessonIds.Contains(li.LessonId) && !li.IsDeleted);
+                var lessonItemIds = lessonItems.Select(li => li.LessonItemId).ToList();
+                var lessonResources = await _unitOfWork.LessonResources.GetAllAsync(lr => lessonItemIds.Contains(lr.LessonItemId) && !lr.IsDeleted); 
+                var gradedItems = await _unitOfWork.GradedItems.GetAllAsync(gi => lessonItemIds.Contains(gi.LessonItemId));
+                var attempt = await _unitOfWork.GradedAttempts.GetAllAsync(ga => ga.UserId == userId && gradedItems.Select(gi => gi.GradedItemId).Contains(ga.GradedItemId));
 
-                foreach (var m in modules.OrderBy(x => x.Index))
-                {
-                    // Lấy lessons active
-                    var lessons = await _unitOfWork.Lessons.GetAllAsync(l => l.ModuleId == m.ModuleId && !l.IsDeleted);
-
-                    responseModules.Add(new StudentModuleResponse
-                    {
-                        Title = m.Name,
-                        Lessons = lessons.OrderBy(l => l.OrderIndex).Select(l => new StudentLessonResponse
-                        {
-                            Title = l.Title,
-                            Duration = l.EstimatedMinutes > 0 ? $"{l.EstimatedMinutes} min" : "10 min",
-                            Type = l.Type.ToString() // Enum to String
-                        }).ToList()
-                    });
-                }
-
-                // 3. Map sang DTO Student (Không dùng AutoMapper để tránh lỗi config)
-                var response = new StudentCourseDetailResponse
-                {
-                    CourseId = course.CourseId,
-                    Title = course.Title,
-                    Description = course.Description,
-                    Price = course.Price,
-                    Image = string.IsNullOrEmpty(course.Image) ? "https://placehold.co/600x400?text=No+Image" : course.Image,
-                    Level = course.Level.ToString(),
-                    Category = "Web Development", // Fake hoặc lấy từ DB
-                    Rating = 4.8, // Fake
-                    Students = 1250, // Fake
-                    Duration = "12h 30m", // Fake
-                    InstructorName = instructor?.FullName ?? "Instructor",
-                    Modules = responseModules
-                };
-
+                var response = _mapper.Map<StudentCourseDetailResponse>(course);
                 return new ApiResponse().SetOk(response);
             }
             catch (Exception ex)

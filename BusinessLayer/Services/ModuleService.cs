@@ -114,7 +114,7 @@ namespace BusinessLayer.Services
                     
                     var lessons = await _unitOfWork.Lessons.GetAllAsync(
                         filter: l => l.ModuleId == mod.ModuleId && !l.IsDeleted,
-                        include: q => q.Include(l => l.GradedItems)
+                        include: q => q.Include(l => l.LessonItems)
                     );
 
                     mod.Lessons = _mapper.Map<List<LessonResponse>>(lessons)

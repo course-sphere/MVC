@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using System.Linq.Expressions;
-
+//18
 namespace DataAccessLayer.Repositories
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class

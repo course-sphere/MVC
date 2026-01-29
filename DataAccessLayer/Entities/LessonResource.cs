@@ -10,7 +10,7 @@
         public int OrderIndex { get; set; }
         public string? TextContent { get; set; }
         public long? DurationInSeconds { get; set; }
-        public bool IsDownloadable { get; set; }
+        public bool IsDownloadable { get; set; } 
         public LessonItem? LessonItem { get; set; }
     }
 

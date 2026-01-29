@@ -99,7 +99,7 @@ namespace BusinessLayer.Services
                 ".jpg" or ".jpeg" or ".png" or ".gif" => ResourceType.Image,
                 ".pdf" => ResourceType.Pdf,
                 ".ppt" or ".pptx" => ResourceType.Slide,
-                ".doc" or ".docx" => ResourceType.Document,
+                ".doc" or ".docx" => ResourceType.Text,
                 _ => ResourceType.Link
             };
         }

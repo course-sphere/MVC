@@ -37,5 +37,6 @@ namespace DataAccessLayer
         public DbSet<UserLessonProgress> UserLessonProgresses { get; set; }
         public DbSet<LessonResource> LessonResources { get; set; }
         public DbSet<Language> Languages { get; set; }
+        public DbSet<LessonItem> LessonItems { get; set; } // 18 Entities
     }
 }

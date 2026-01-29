@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DataAccessLayer.Entities;
+using System;
 using System.Collections.Generic;
 
 namespace BusinessLayer.Responses.Course
@@ -16,20 +17,29 @@ namespace BusinessLayer.Responses.Course
         public int Students { get; set; }
         public string Duration { get; set; }
         public string? InstructorName { get; set; }
-
+        public string Language { get; set; }
         public List<StudentModuleResponse> Modules { get; set; } = new List<StudentModuleResponse>();
     }
-
     public class StudentModuleResponse
     {
         public string Title { get; set; }
+        public string? Description { get; set; }
+        public int Index { get; set; }
         public List<StudentLessonResponse> Lessons { get; set; } = new List<StudentLessonResponse>();
     }
 
     public class StudentLessonResponse
     {
         public string Title { get; set; }
+        public string? Description { get; set; }
         public string Duration { get; set; }
-        public string Type { get; set; } // "Video", "Reading", "Quiz"
+        public int OrderIndex { get; set; }
+        public List<StudentLessonItemResponse> LessonItem { get; set; } = new List<StudentLessonItemResponse>();
+    }
+
+    public class StudentLessonItemResponse
+    {
+        public LessonItemType Type { get; set; }
+        public int OrderIndex { get; set; }
     }
 }

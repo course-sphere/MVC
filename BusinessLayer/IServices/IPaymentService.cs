@@ -6,7 +6,7 @@ namespace BusinessLayer.IServices
 {
     public interface IPaymentService
     {
-        Task<ApiResponse> CreatePaymentUrlAsync(CreateNewPaymentRequest request, HttpContext context);
-        Task<ApiResponse> PaymentExecuteAsync(IQueryCollection collection);
+/*        Task<ApiResponse> CreatePaymentUrlAsync(CreateNewPaymentRequest request, HttpContext context);
+        Task<ApiResponse> PaymentExecuteAsync(IQueryCollection collection);*/
     }
 }

@@ -16,7 +16,7 @@ namespace BusinessLayer.IServices
         Task<ApiResponse> SubmitCourseForReviewAsync(Guid courseId);
         Task<ApiResponse> GetCoursesByStatusAsync(CourseStatus status);
         Task<ApiResponse> GetCourseByIdAsync(Guid courseId);
-        Task<ApiResponse> GetCourseLearningDetailAsync(Guid courseId);
+        //Task<ApiResponse> GetCourseLearningDetailAsync(Guid courseId);
         Task<ApiResponse> GetCourseDetailForStudentAsync(Guid courseId);
     }
 }

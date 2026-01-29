@@ -33,35 +33,42 @@ namespace BusinessLayer.Services
                 var claim = _service.GetUserClaim();
 
                 // 1. Kiểm tra Lesson tồn tại
-                var lesson = await _unitOfWork.Lessons.GetAsync(l => l.LessonId == request.LessonId);
-                if (lesson == null)
+                var lessonItem = await _unitOfWork.LessonItems.GetAsync(li => li.LessonItemId == request.LessonItemId);
+                if (lessonItem == null)
                 {
-                    return response.SetNotFound("Lesson not found or may have been automatically deleted due to inactivity!!! Please check your course");
+                    return response.SetNotFound("LessonItem not found or may have been automatically deleted due to inactivity!!! Please check your course");
                 }
 
-                if (request.File == null)
+                if (request.File == null && string.IsNullOrWhiteSpace(request.TextContent))
                 {
-                    return response.SetBadRequest(message: "Thêm File vào =,=");
+                    return response.SetBadRequest(message: "Add File Or Text Content =,=");
                 }
-
-                // ===> LOGIC TỰ ĐỘNG TÍNH ORDER INDEX <===
-                // 2. Lấy danh sách tài liệu hiện có của bài học này
-                var existingResources = await _unitOfWork.LessonResources.GetAllAsync(r => r.LessonId == request.LessonId && !r.IsDeleted);
-
-                // 3. Tìm số thứ tự lớn nhất + 1
-                int newOrderIndex = existingResources.Any() ? existingResources.Max(r => r.OrderIndex) + 1 : 1;
+                if (request.File != null && !string.IsNullOrWhiteSpace(request.TextContent))
+                {
+                    return response.SetBadRequest(
+                        message: "Only one resource type is allowed: File OR TextContent"
+                    );
+                }
 
                 var lessonResource = _mapper.Map<LessonResource>(request);
 
-                // 4. Upload lên Firebase
-                var uploadResource = await _storage.UploadLessonResourceAsync(request.LessonId, request.Title, request.File);
+                if (request.File != null)
+                {
+                    // 4. Upload lên Firebase
+                    var uploadResource = await _storage.UploadLessonResourceAsync(request.LessonItemId, request.Title, request.File);
 
-                // 5. Gán các thông tin
-                lessonResource.ResourceUrl = uploadResource.Url;
-                lessonResource.ResourceType = uploadResource.Type;
-                lessonResource.CreatedBy = claim.UserId;
-                lessonResource.OrderIndex = newOrderIndex; // <== Gán Index tự động tại đây
+                    // 5. Gán các thông tin
+                    lessonResource.ResourceUrl = uploadResource.Url;
+                    lessonResource.ResourceType = uploadResource.Type;
+                    lessonResource.CreatedBy = claim.UserId;
 
+                }
+                else
+                {
+                    lessonResource.TextContent = request.TextContent;
+                    lessonResource.ResourceType = ResourceType.Text;
+                    lessonResource.CreatedBy = claim.UserId;
+                }
                 await _unitOfWork.LessonResources.AddAsync(lessonResource);
                 await _unitOfWork.SaveChangeAsync();
 
@@ -74,18 +81,18 @@ namespace BusinessLayer.Services
             }
         }
 
-        public async Task<ApiResponse> GetResourcesByLessonAsync(Guid lessonId)
+        public async Task<ApiResponse> GetResourcesByLessonItemAsync(Guid lessonItemId)
         {
             ApiResponse response = new ApiResponse();
             try
             {
-                var lesson = await _unitOfWork.Lessons.GetAsync(l => l.LessonId == lessonId);
-                if (lesson == null)
-                    return response.SetNotFound("Lesson not found");
+                var lessonItem = await _unitOfWork.LessonItems.GetAsync(l => l.LessonItemId == lessonItemId);
+                if (lessonItem == null)
+                    return response.SetNotFound("Lesson Item not found");
 
                 // Lấy resource chưa bị xóa
                 var resources = await _unitOfWork.LessonResources.GetAllAsync(
-                    r => r.LessonId == lessonId && !r.IsDeleted
+                    r => r.LessonItemId == lessonItemId && !r.IsDeleted
                 );
 
                 // ===> SẮP XẾP TRƯỚC KHI TRẢ VỀ <===
@@ -126,7 +133,7 @@ namespace BusinessLayer.Services
                     }*/
 
                     var upload = await _storage.UploadLessonResourceAsync(
-                        resource.LessonId,
+                        resource.LessonItemId,
                         resource.Title,
                         request.File
                     );
