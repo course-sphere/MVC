@@ -1,0 +1,98 @@
+@model List<DataAccessLayer.Entities.User>
+@using DataAccessLayer.Entities
+@{
+    ViewData["Title"] = "Manage Users";
+    Layout = "_AdminLayout";
+}
+
+<partial name="_Notification" />
+
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-2xl font-bold text-zinc-900">Manage Users</h1>
+            <p class="text-zinc-500 mt-1">@Model.Count total users</p>
+        </div>
+        <a asp-action="Index" class="px-4 py-2 text-zinc-600 hover:text-zinc-900 font-medium">
+            <i class="fas fa-arrow-left mr-2"></i>Back to Dashboard
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-zinc-200 overflow-hidden">
+        <table class="w-full">
+            <thead class="bg-zinc-50 border-b border-zinc-200">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">User</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Role</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 uppercase">Status</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-zinc-500 uppercase">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-100">
+                @foreach (var user in Model)
+                {
+                    <tr class="hover:bg-zinc-50">
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                @if (!string.IsNullOrEmpty(user.Image))
+                                {
+                                    <img src="@user.Image" class="w-10 h-10 rounded-full object-cover">
+                                }
+                                else
+                                {
+                                    <div class="w-10 h-10 bg-zinc-200 rounded-full flex items-center justify-center">
+                                        <i class="fas fa-user text-zinc-400"></i>
+                                    </div>
+                                }
+                                <div>
+                                    <p class="font-medium text-zinc-900">@user.FullName</p>
+                                    @if (!string.IsNullOrEmpty(user.Title))
+                                    {
+                                        <p class="text-sm text-zinc-500">@user.Title</p>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 text-zinc-600">@user.Email</td>
+                        <td class="px-6 py-4">
+                            @{
+                                var roleColor = user.Role switch
+                                {
+                                    Role.Admin => "bg-purple-100 text-purple-700",
+                                    Role.Instructor => "bg-blue-100 text-blue-700",
+                                    _ => "bg-zinc-100 text-zinc-700"
+                                };
+                            }
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-medium @roleColor">@user.Role</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            @if (user.IsVerfied)
+                            {
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">Verified</span>
+                            }
+                            else
+                            {
+                                <span class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Pending</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4">
+                            <form asp-action="UpdateUserRole" method="post" class="flex items-center justify-end gap-2">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="id" value="@user.UserId" />
+                                <select name="role" class="px-3 py-1.5 border border-zinc-300 rounded-lg text-sm bg-white">
+                                    <option value="0" selected="@(user.Role == Role.Admin)">Admin</option>
+                                    <option value="1" selected="@(user.Role == Role.Instructor)">Instructor</option>
+                                    <option value="2" selected="@(user.Role == Role.Student)">Student</option>
+                                </select>
+                                <button type="submit" class="px-3 py-1.5 bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 text-sm font-medium">
+                                    Update
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

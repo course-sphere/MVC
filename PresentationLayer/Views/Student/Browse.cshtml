@@ -1,18 +1,16 @@
 @model List<BusinessLayer.Responses.Course.CourseResponse>
-@{ ViewData["Title"] = "Home"; Layout = "_Layout"; }
+@{ ViewData["Title"] = "Browse Courses"; Layout = "_Layout"; }
 
-<div class="max-w-6xl mx-auto py-12 px-4">
-    <div class="text-center mb-12">
-        <h1 class="text-4xl font-bold text-zinc-900 mb-4">Learn Something New Today</h1>
-        <p class="text-lg text-zinc-600">Explore our courses and start your learning journey</p>
-    </div>
+<partial name="_Notification" />
+
+<div class="max-w-6xl mx-auto py-8 px-4">
+    <h1 class="text-2xl font-bold text-zinc-900 mb-6">Browse Courses</h1>
 
     @if (Model.Count == 0)
     {
         <div class="bg-white rounded-xl border border-zinc-200 p-12 text-center">
-            <i class="fas fa-graduation-cap text-5xl text-zinc-300 mb-4"></i>
-            <h3 class="text-lg font-medium text-zinc-900 mb-2">No courses available yet</h3>
-            <p class="text-zinc-500">Check back soon for new courses</p>
+            <i class="fas fa-search text-4xl text-zinc-300 mb-4"></i>
+            <h3 class="text-lg font-medium text-zinc-900">No courses available</h3>
         </div>
     }
     else
@@ -20,14 +18,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             @foreach (var course in Model)
             {
-                <a asp-controller="Student" asp-action="Detail" asp-route-id="@course.CourseId" class="bg-white rounded-xl border border-zinc-200 overflow-hidden hover:shadow-lg transition-shadow block">
+                <a asp-action="Detail" asp-route-id="@course.CourseId" class="bg-white rounded-xl border border-zinc-200 overflow-hidden hover:shadow-lg transition-shadow block">
                     @if (!string.IsNullOrEmpty(course.Image))
                     { <img src="@course.Image" class="w-full h-40 object-cover"> }
                     else
                     { <div class="w-full h-40 bg-zinc-200 flex items-center justify-center"><i class="fas fa-image text-zinc-400 text-3xl"></i></div> }
                     <div class="p-4">
                         <h3 class="font-semibold text-zinc-900 mb-1">@course.Title</h3>
-                        <p class="text-sm text-zinc-500 line-clamp-2 mb-3">@course.Description</p>
+                        <p class="text-sm text-zinc-500 line-clamp-2 mb-2">@course.Description</p>
                         <div class="flex items-center justify-between">
                             <span class="text-xs px-2 py-0.5 rounded-full bg-zinc-100 text-zinc-600">@course.Level</span>
                             @if (course.Price == 0)
