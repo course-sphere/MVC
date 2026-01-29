@@ -8,6 +8,7 @@
         public string OllamaAI { get; set; }
         public string SecretToken { get; set; }
         public SMTP SMTP { get; set; }
+        public PayOS PayOS { get; set; }
     }
     public class SMTP
     {
@@ -29,5 +30,14 @@
     {
         public string Default { get; set; }
         public string MicrosoftAspNetCore { get; set; }
+    }
+
+    public class PayOS
+    {
+        public string ClientId { get; set; }
+        public string ApiKey { get; set; }
+        public string ChecksumKey { get; set; }
+        public string ReturnUrl { get; set; }
+        public string CancelUrl { get; set; }
     }
 }

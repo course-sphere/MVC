@@ -2,13 +2,14 @@
 {
     public class PaymentResponse
     {
-        public string OrderDescription { get; set; }
-        public string TransactionId { get; set; }
-        public string OrderId { get; set; }
-        public string PaymentMethod { get; set; }
-        public string PaymentId { get; set; }
+        public string OrderId { get; set; }          // orderCode bên PayOS
+        public string PaymentLinkId { get; set; }    // id link thanh toán
+        public string Description { get; set; }      // mô tả đơn hàng
+        public long Amount { get; set; }
+
+        public string Status { get; set; }           // PAID | PENDING | CANCELLED
         public bool Success { get; set; }
-        public string Token { get; set; }
-        public string VnPayResponseCode { get; set; }
+
+        public string CheckoutUrl { get; set; }      // link redirect user
     }
 }

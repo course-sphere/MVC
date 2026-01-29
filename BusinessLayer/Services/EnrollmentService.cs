@@ -22,7 +22,7 @@ namespace BusinessLayer.Services
             _mapper = mapper;
             _service = service;
         }
-
+/*
         public async Task<ApiResponse> CreateNewEnrollmentAsync(CreateNewEnrollementRequest request)
         {
             ApiResponse response = new ApiResponse();
@@ -50,7 +50,7 @@ namespace BusinessLayer.Services
             {
                 return response.SetBadRequest(message: ex.Message);
             }
-        }
+        }*/
 
         public async Task<ApiResponse> EnrollStudentDirectlyAsync(Guid courseId)
         {
