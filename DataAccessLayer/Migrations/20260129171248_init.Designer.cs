@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260128235834_InitialDb")]
-    partial class InitialDb
+    [Migration("20260129171248_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -333,7 +333,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("11111111-1111-1111-1111-111111111111"),
                             Code = "en",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8864),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3424),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -343,7 +343,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("22222222-2222-2222-2222-222222222222"),
                             Code = "ja",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8875),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3438),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -353,7 +353,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("33333333-3333-3333-3333-333333333333"),
                             Code = "ko",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8877),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3441),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -363,7 +363,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("44444444-4444-4444-4444-444444444444"),
                             Code = "zh",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8878),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3442),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -373,7 +373,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("55555555-5555-5555-5555-555555555555"),
                             Code = "es",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8879),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3444),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -383,7 +383,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("66666666-6666-6666-6666-666666666666"),
                             Code = "fr",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8881),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3446),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -393,7 +393,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("77777777-7777-7777-7777-777777777777"),
                             Code = "de",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8882),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3447),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -403,7 +403,7 @@ namespace DataAccessLayer.Migrations
                         {
                             LanguageId = new Guid("88888888-8888-8888-8888-888888888888"),
                             Code = "vi",
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 813, DateTimeKind.Utc).AddTicks(8883),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 336, DateTimeKind.Utc).AddTicks(3449),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             IsActive = true,
                             IsDeleted = false,
@@ -598,6 +598,18 @@ namespace DataAccessLayer.Migrations
                     b.Property<decimal>("Amount")
                         .HasColumnType("numeric");
 
+                    b.Property<string>("CheckoutUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CounterAccountBankName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CounterAccountName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CounterAccountNumber")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uuid");
 
@@ -607,18 +619,38 @@ namespace DataAccessLayer.Migrations
                     b.Property<Guid>("CreatedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<Guid>("EnrollmentId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsSuccess")
-                        .HasColumnType("boolean");
-
                     b.Property<string>("Method")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<long>("OrderCode")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("PaymentLinkId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("RawWebhookData")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Reference")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -828,53 +860,53 @@ namespace DataAccessLayer.Migrations
                         new
                         {
                             UserId = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 818, DateTimeKind.Utc).AddTicks(1467),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 340, DateTimeKind.Utc).AddTicks(5414),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             Email = "Student1@gmail.com",
                             FullName = "Student1",
                             IsDeleted = false,
                             IsVerfied = true,
-                            PasswordHash = new byte[] { 8, 20, 6, 53, 33, 107, 242, 26, 88, 252, 125, 52, 226, 34, 168, 21, 101, 143, 201, 163, 94, 180, 206, 163, 50, 20, 33, 5, 22, 97, 72, 114, 108, 208, 34, 53, 59, 62, 181, 141, 80, 156, 11, 24, 115, 123, 149, 182, 24, 223, 41, 120, 247, 163, 61, 198, 158, 144, 125, 23, 38, 214, 188, 78 },
-                            PasswordSalt = new byte[] { 118, 33, 95, 21, 242, 154, 60, 149, 81, 165, 13, 195, 28, 170, 27, 137, 183, 39, 56, 254, 53, 104, 148, 207, 230, 97, 120, 73, 236, 143, 209, 96, 94, 83, 77, 223, 64, 233, 179, 154, 13, 184, 24, 237, 10, 168, 127, 189, 37, 76, 10, 75, 152, 245, 28, 149, 181, 160, 18, 102, 239, 237, 235, 241, 144, 33, 105, 58, 149, 46, 201, 165, 96, 199, 22, 243, 156, 58, 59, 4, 236, 125, 215, 216, 189, 249, 102, 160, 74, 187, 100, 237, 200, 249, 47, 140, 255, 46, 186, 78, 77, 147, 184, 164, 246, 250, 150, 123, 168, 20, 19, 249, 253, 193, 102, 20, 202, 148, 5, 157, 159, 19, 254, 145, 94, 103, 220, 171 },
-                            Role = 0
+                            PasswordHash = new byte[] { 70, 125, 146, 217, 158, 229, 194, 96, 228, 4, 211, 82, 173, 28, 112, 15, 149, 16, 135, 210, 90, 147, 243, 133, 65, 24, 224, 102, 224, 166, 14, 66, 84, 129, 215, 167, 89, 48, 24, 154, 29, 198, 24, 53, 240, 183, 101, 87, 23, 198, 38, 163, 174, 22, 240, 136, 130, 107, 222, 80, 63, 65, 189, 119 },
+                            PasswordSalt = new byte[] { 58, 14, 60, 95, 68, 64, 132, 246, 245, 249, 212, 61, 247, 190, 29, 35, 116, 200, 118, 120, 137, 227, 45, 176, 125, 46, 17, 219, 145, 8, 107, 132, 15, 210, 128, 28, 38, 79, 50, 210, 190, 114, 92, 211, 155, 28, 40, 125, 89, 161, 133, 210, 19, 75, 186, 2, 245, 227, 61, 160, 49, 47, 88, 103, 117, 24, 55, 4, 187, 95, 95, 107, 198, 223, 33, 95, 170, 133, 27, 32, 236, 153, 202, 165, 98, 152, 62, 71, 129, 162, 56, 5, 207, 186, 101, 155, 130, 18, 89, 19, 250, 80, 76, 133, 81, 67, 24, 240, 69, 226, 190, 192, 163, 31, 240, 37, 199, 171, 15, 27, 228, 34, 68, 97, 177, 18, 223, 168 },
+                            Role = 2
                         },
                         new
                         {
                             UserId = new Guid("22222222-2222-2222-2222-222222222222"),
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 818, DateTimeKind.Utc).AddTicks(1477),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 340, DateTimeKind.Utc).AddTicks(5421),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             Email = "Student2@gmail.com",
                             FullName = "Student2",
                             IsDeleted = false,
                             IsVerfied = true,
-                            PasswordHash = new byte[] { 100, 238, 229, 175, 9, 128, 153, 71, 160, 2, 23, 147, 92, 244, 210, 135, 130, 242, 130, 20, 91, 8, 91, 209, 236, 26, 113, 172, 74, 50, 75, 234, 4, 32, 72, 12, 106, 141, 68, 52, 163, 147, 29, 83, 84, 22, 94, 150, 33, 44, 78, 246, 78, 59, 210, 41, 70, 76, 87, 133, 13, 157, 253, 120 },
-                            PasswordSalt = new byte[] { 176, 147, 59, 195, 134, 9, 243, 109, 23, 225, 162, 1, 69, 217, 174, 247, 55, 40, 233, 80, 172, 154, 207, 208, 109, 101, 124, 133, 63, 32, 46, 43, 170, 219, 217, 228, 46, 122, 181, 141, 130, 237, 46, 93, 35, 141, 73, 110, 234, 32, 48, 13, 252, 254, 190, 176, 192, 97, 136, 109, 248, 127, 140, 173, 83, 232, 201, 159, 246, 105, 145, 86, 138, 215, 160, 146, 248, 89, 84, 189, 180, 208, 24, 83, 153, 35, 164, 37, 216, 2, 30, 101, 231, 32, 117, 186, 170, 99, 100, 205, 21, 114, 104, 219, 223, 245, 206, 25, 201, 130, 196, 21, 178, 252, 1, 113, 140, 10, 20, 233, 217, 50, 64, 148, 249, 36, 233, 71 },
-                            Role = 0
+                            PasswordHash = new byte[] { 252, 226, 93, 93, 216, 223, 117, 255, 11, 145, 152, 29, 142, 206, 90, 216, 122, 153, 219, 83, 144, 214, 99, 239, 2, 57, 73, 245, 75, 214, 4, 12, 148, 111, 4, 3, 9, 116, 185, 48, 239, 126, 131, 121, 2, 165, 247, 168, 211, 214, 10, 242, 113, 225, 133, 223, 60, 126, 126, 165, 235, 77, 37, 156 },
+                            PasswordSalt = new byte[] { 87, 200, 226, 136, 48, 163, 28, 61, 197, 179, 79, 176, 143, 232, 58, 104, 73, 34, 198, 117, 134, 127, 174, 247, 172, 35, 210, 132, 208, 2, 204, 32, 226, 27, 62, 252, 140, 227, 218, 178, 199, 140, 79, 189, 111, 138, 114, 100, 33, 152, 39, 75, 110, 12, 36, 7, 39, 163, 7, 6, 252, 80, 84, 30, 143, 100, 191, 12, 157, 55, 186, 225, 22, 172, 0, 89, 108, 232, 152, 26, 244, 59, 42, 207, 2, 245, 10, 65, 5, 118, 138, 17, 90, 68, 75, 130, 197, 37, 19, 187, 174, 28, 114, 33, 253, 76, 161, 137, 28, 105, 193, 61, 100, 222, 204, 104, 31, 154, 203, 197, 220, 193, 110, 175, 22, 75, 240, 101 },
+                            Role = 2
                         },
                         new
                         {
                             UserId = new Guid("33333333-3333-3333-3333-333333333333"),
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 818, DateTimeKind.Utc).AddTicks(1480),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 340, DateTimeKind.Utc).AddTicks(5424),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
-                            Email = "Employer@gmail.com",
+                            Email = "Instructor@gmail.com",
                             FullName = "Instructor",
                             IsDeleted = false,
                             IsVerfied = true,
-                            PasswordHash = new byte[] { 25, 241, 155, 56, 191, 147, 220, 19, 50, 51, 152, 171, 17, 12, 235, 21, 100, 57, 26, 153, 110, 150, 155, 164, 154, 176, 209, 165, 20, 224, 106, 94, 135, 115, 119, 209, 219, 224, 117, 230, 61, 24, 38, 116, 181, 80, 196, 225, 221, 6, 204, 178, 158, 59, 56, 169, 233, 213, 34, 243, 144, 189, 52, 44 },
-                            PasswordSalt = new byte[] { 73, 243, 175, 222, 159, 216, 81, 233, 66, 208, 3, 194, 253, 110, 141, 210, 142, 250, 109, 59, 3, 143, 124, 67, 228, 176, 93, 186, 231, 227, 211, 2, 82, 59, 193, 7, 69, 127, 29, 137, 29, 254, 162, 96, 243, 6, 55, 251, 156, 204, 46, 172, 133, 223, 233, 70, 2, 144, 177, 131, 101, 132, 125, 108, 145, 41, 95, 27, 246, 141, 254, 89, 229, 98, 156, 205, 125, 87, 255, 42, 251, 244, 14, 212, 137, 25, 131, 83, 113, 136, 176, 228, 11, 214, 132, 19, 194, 229, 242, 20, 58, 232, 231, 29, 252, 206, 167, 239, 92, 157, 202, 9, 71, 22, 241, 170, 152, 25, 164, 55, 90, 27, 70, 156, 166, 85, 199, 118 },
-                            Role = 0
+                            PasswordHash = new byte[] { 117, 39, 137, 24, 69, 41, 14, 128, 160, 150, 252, 160, 172, 234, 211, 35, 121, 245, 107, 36, 40, 35, 115, 167, 216, 29, 188, 243, 47, 48, 194, 89, 145, 77, 150, 83, 207, 177, 87, 104, 20, 78, 101, 188, 87, 76, 191, 147, 22, 210, 241, 221, 117, 185, 87, 84, 244, 58, 63, 140, 234, 21, 217, 45 },
+                            PasswordSalt = new byte[] { 186, 48, 39, 20, 120, 220, 121, 92, 148, 231, 215, 173, 112, 38, 114, 25, 128, 222, 24, 219, 155, 84, 173, 110, 93, 172, 249, 137, 171, 31, 94, 66, 84, 58, 53, 61, 135, 168, 65, 39, 14, 89, 91, 229, 149, 118, 51, 133, 8, 170, 112, 3, 191, 47, 14, 11, 119, 22, 207, 171, 82, 105, 229, 107, 228, 159, 158, 79, 77, 153, 42, 183, 107, 61, 129, 128, 3, 185, 89, 79, 101, 203, 124, 89, 129, 160, 133, 212, 143, 3, 35, 168, 104, 9, 88, 244, 221, 101, 157, 75, 39, 246, 56, 12, 112, 18, 23, 97, 176, 210, 158, 30, 47, 157, 211, 158, 14, 26, 25, 157, 136, 201, 102, 11, 116, 135, 183, 251 },
+                            Role = 1
                         },
                         new
                         {
                             UserId = new Guid("44444444-4444-4444-4444-444444444444"),
-                            CreatedAt = new DateTime(2026, 1, 28, 23, 58, 33, 818, DateTimeKind.Utc).AddTicks(1481),
+                            CreatedAt = new DateTime(2026, 1, 29, 17, 12, 48, 340, DateTimeKind.Utc).AddTicks(5426),
                             CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
                             Email = "Admin@gmail.com",
                             FullName = "Admin",
                             IsDeleted = false,
                             IsVerfied = true,
-                            PasswordHash = new byte[] { 107, 242, 92, 132, 119, 173, 73, 17, 183, 2, 83, 196, 81, 51, 93, 39, 186, 175, 193, 96, 40, 15, 104, 139, 115, 238, 168, 194, 16, 30, 114, 68, 82, 231, 129, 185, 122, 158, 146, 105, 83, 12, 121, 140, 136, 219, 110, 236, 226, 20, 14, 158, 123, 19, 193, 91, 239, 237, 65, 118, 19, 212, 124, 71 },
-                            PasswordSalt = new byte[] { 50, 34, 17, 142, 173, 240, 117, 233, 58, 54, 34, 175, 226, 56, 26, 86, 188, 22, 253, 117, 106, 10, 191, 41, 129, 96, 144, 208, 182, 232, 2, 124, 160, 127, 46, 98, 153, 190, 141, 152, 97, 41, 158, 1, 80, 119, 49, 18, 13, 252, 171, 245, 245, 101, 152, 48, 14, 225, 27, 159, 36, 91, 15, 253, 78, 141, 3, 202, 43, 93, 125, 38, 46, 213, 175, 65, 212, 20, 232, 98, 16, 151, 152, 161, 70, 48, 205, 78, 0, 18, 67, 100, 58, 143, 214, 130, 154, 100, 32, 147, 65, 51, 82, 42, 129, 165, 122, 250, 244, 199, 76, 124, 136, 33, 196, 103, 25, 164, 163, 121, 149, 44, 76, 116, 78, 112, 149, 71 },
+                            PasswordHash = new byte[] { 175, 167, 223, 218, 40, 210, 91, 42, 189, 58, 19, 28, 192, 169, 181, 165, 196, 67, 135, 230, 24, 176, 176, 208, 146, 5, 203, 196, 87, 240, 2, 106, 43, 59, 61, 186, 169, 99, 104, 166, 75, 219, 233, 130, 168, 66, 112, 51, 104, 96, 19, 248, 211, 123, 126, 12, 183, 133, 3, 28, 116, 184, 182, 34 },
+                            PasswordSalt = new byte[] { 205, 239, 213, 75, 119, 170, 188, 242, 182, 90, 191, 224, 65, 117, 239, 19, 197, 228, 130, 23, 131, 233, 73, 212, 28, 111, 157, 207, 191, 211, 63, 148, 187, 135, 154, 102, 178, 0, 66, 209, 5, 44, 53, 155, 38, 18, 65, 228, 244, 102, 43, 100, 252, 237, 77, 219, 255, 206, 209, 172, 175, 164, 171, 231, 98, 56, 97, 254, 61, 232, 23, 141, 69, 113, 77, 163, 225, 82, 20, 46, 84, 125, 226, 117, 169, 254, 119, 42, 162, 29, 121, 243, 22, 191, 235, 208, 221, 251, 240, 95, 4, 181, 71, 77, 100, 252, 249, 6, 36, 227, 65, 207, 239, 125, 230, 202, 255, 201, 233, 108, 233, 6, 172, 241, 152, 69, 85, 88 },
                             Role = 0
                         });
                 });

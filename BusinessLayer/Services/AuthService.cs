@@ -17,14 +17,12 @@ namespace BusinessLayer.Services
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly AppSettings _appSettings;
-        private readonly IMapper _mapper;
         private readonly IFirebaseStorageService _firebaseStorageService;
 
-        public AuthService(IUnitOfWork unitOfWork, AppSettings appSettings, IMapper mapper, IFirebaseStorageService firebaseStorageService)
+        public AuthService(IUnitOfWork unitOfWork, AppSettings appSettings, IFirebaseStorageService firebaseStorageService)
         {
             _unitOfWork = unitOfWork;
             _appSettings = appSettings;
-            _mapper = mapper;
             _firebaseStorageService = firebaseStorageService;
         }
 

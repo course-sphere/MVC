@@ -18,14 +18,12 @@ namespace BusinessLayer.Services
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IConfiguration _config;
         private readonly IUnitOfWork _uow;
         private readonly IClaimService _service;
         private readonly AppSettings _appSettings;
 
-        public PaymentService(IConfiguration config, IUnitOfWork uow, IClaimService service, AppSettings appSettings)
+        public PaymentService(IUnitOfWork uow, IClaimService service, AppSettings appSettings)
         {
-            _config = config;
             _uow = uow;
             _service = service;
             _appSettings = appSettings;
@@ -182,43 +180,52 @@ namespace BusinessLayer.Services
             var enrollment = new Enrollment
             {
                 EnrollmentId = Guid.NewGuid(),
+                CourseId = course.CourseId,
+                UserId = userId,
                 Status = EnrollmentStatus.PendingPayment,
             };
             await _uow.Enrollments.AddAsync(enrollment);
-            var payment = new Payment
-            {
-                PaymentId = Guid.NewGuid(),
-                UserId = userId,
-                CourseId = request.CourseId,
-                Amount = request.Amount,
-                EnrollmentId = enrollment.EnrollmentId, 
-                Status = PaymentStatus.Pending,
-                OrderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
-            };
+            
 
-            await _uow.Payments.AddAsync(payment);
-            await _uow.SaveChangeAsync();
-
-            var payOS = new PayOSClient(
+            /*var payOS = new PayOSClient(
                 Environment.GetEnvironmentVariable(_appSettings.PayOS.ClientId),
                 Environment.GetEnvironmentVariable(_appSettings.PayOS.ApiKey),
                 Environment.GetEnvironmentVariable(_appSettings.PayOS.ChecksumKey)
+            );*/
+            var payOS = new PayOSClient(
+                _appSettings.PayOS.ClientId,
+                _appSettings.PayOS.ApiKey,
+                _appSettings.PayOS.ChecksumKey
             );
 
             var requestData = new CreatePaymentLinkRequest
             {
-                OrderCode = payment.OrderCode,
-                Amount = (int)payment.Amount,
+                OrderCode = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                Amount = (int)request.Amount,
                 Description = $"Course: {course.Title}",
                 ReturnUrl = _appSettings.PayOS.ReturnUrl,
                 CancelUrl = _appSettings.PayOS.CancelUrl
             };
 
             var response = await payOS.PaymentRequests.CreateAsync(requestData);
+            var payment = new Payment
+            {
+                PaymentId = Guid.NewGuid(),
+                UserId = userId,
+                CourseId = course.CourseId,
+                EnrollmentId = enrollment.EnrollmentId,
+                Amount = request.Amount,
+                Status = PaymentStatus.Pending,
+                OrderCode = requestData.OrderCode,
+                PaymentLinkId = response.PaymentLinkId,
+                CheckoutUrl = response.CheckoutUrl
+            };
 
+            await _uow.Payments.AddAsync(payment);
+            await _uow.SaveChangeAsync();
             payment.CheckoutUrl = response.CheckoutUrl;
             await _uow.SaveChangeAsync();
-
+            Console.WriteLine(response);
             return new PaymentResponse
             {
                 CheckoutUrl = response.CheckoutUrl

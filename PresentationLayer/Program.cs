@@ -52,7 +52,10 @@ builder.Services.AddScoped<IModuleService, ModuleService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient<PaymentApiClient>(client =>
+{
+    client.BaseAddress = new Uri("https://localhost:5001"); // API URL
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

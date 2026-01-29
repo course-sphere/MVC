@@ -29,7 +29,8 @@ namespace DataAccessLayer.Configurations
                         PasswordSalt = user1.PasswordSalt,
                         FullName = "Student1",
                         Email = "Student1@gmail.com",
-                        IsVerfied = true
+                        IsVerfied = true,
+                        Role = Role.Student
                     },
                     new User
                     {
@@ -38,7 +39,8 @@ namespace DataAccessLayer.Configurations
                         PasswordSalt = user2.PasswordSalt,
                         FullName = "Student2",
                         Email = "Student2@gmail.com",
-                        IsVerfied = true
+                        IsVerfied = true,
+                        Role = Role.Student
                     },
                      new User
                      {
@@ -46,8 +48,9 @@ namespace DataAccessLayer.Configurations
                          PasswordHash = employer.PasswordHash,
                          PasswordSalt = employer.PasswordSalt,
                          FullName = "Instructor",
-                         Email = "Employer@gmail.com",
-                         IsVerfied = true
+                         Email = "Instructor@gmail.com",
+                         IsVerfied = true,
+                         Role = Role.Instructor
                      },
                   new User
                   {
@@ -56,7 +59,8 @@ namespace DataAccessLayer.Configurations
                       PasswordSalt = admin.PasswordSalt,
                       FullName = "Admin",
                       Email = "Admin@gmail.com",
-                      IsVerfied = true
+                      IsVerfied = true,
+                      Role = Role.Admin
                   }
                 );
         }
